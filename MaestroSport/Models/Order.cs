@@ -5,29 +5,33 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MaestroSport.Models
 {
-    // يمثل الطلب الكلي للزبون
-    public class Order
-    {
-        [Key]
-        public int Id { get; set; }
+ 
+        public class Order
+        {
+            [Key]
+            public int Id { get; set; }
 
-        // تم جعل رقم الهاتف اختيارياً (Nullable) لحل مشكلة الـ Crash في قاعدة البيانات
-        [Display(Name = "رقم الهاتف")]
-        public string? PhoneNumber { get; set; }
+            [Display(Name = "رقم الهاتف")]
+            public string? PhoneNumber { get; set; }
 
-        [Display(Name = "ملاحظات")]
-        public string? Notes { get; set; }
+            [Display(Name = "ملاحظات")]
+            public string? Notes { get; set; }
 
-        public string FabricType { get; set; } = "قياسي";
-        public decimal FabricExtraPrice { get; set; }
-        public string? CouponCode { get; set; }
-        public decimal TotalAmount { get; set; }
-        public DateTime ExpectedDeliveryDate { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public string Status { get; set; } = "قيد المراجعة";
+            // --- الحقل الجديد: صورة التصميم المرفقة من الزبون ---
+            [Display(Name = "صورة التصميم المرفقة")]
+            public string? CustomDesignImageUrl { get; set; }
 
-        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-    }
+            public string FabricType { get; set; } = "قياسي";
+            public decimal FabricExtraPrice { get; set; }
+            public string? CouponCode { get; set; }
+            public decimal TotalAmount { get; set; }
+            public DateTime ExpectedDeliveryDate { get; set; }
+            public DateTime CreatedAt { get; set; } = DateTime.Now;
+            public string Status { get; set; } = "قيد المراجعة";
+
+            public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        }
+    
 
     // يمثل تفاصيل القطع داخل الطلب (مثال: طلب 3 قطع S و قطعتين 3XL من نفس الموديل)
     public class OrderItem

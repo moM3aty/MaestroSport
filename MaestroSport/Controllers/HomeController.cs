@@ -1,23 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using MaestroSport.Data;
+using MaestroSport.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MaestroSport.Data;
-using MaestroSport.Models;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+using System.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace MaestroSport.Controllers
 {
+    // إنشاء DTO لتمثيل البيانات المرسلة من الفرونت اند
+    public class OrderSubmissionDto
+    {
+        public int ProductId { get; set; }
+        public string Notes { get; set; }
+        public string FabricType { get; set; }
+        public decimal FabricExtraPrice { get; set; }
+        public string CouponCode { get; set; }
+        public string ItemsJson { get; set; } // المصفوفة ستأتي كنص JSON
+        public IFormFile CustomImage { get; set; } // استقبال الصورة
+    }
+
+    public class OrderItemDto
+    {
+        public int SizeId { get; set; }
+        public int Quantity { get; set; }
+    }
+
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public HomeController(ApplicationDbContext context)
+        public HomeController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<IActionResult> Index()
@@ -26,34 +50,13 @@ namespace MaestroSport.Controllers
             var announcement = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "AnnouncementBar");
             ViewBag.AnnouncementBar = announcement?.Value ?? "مرحباً بكم في المايسترو للرياضة";
 
-            // حل مشكلة الـ Object Cycle عبر اختيار الحقول المطلوبة فقط (Projection)
+            // جلب الأقسام مع منتجاتها لتحويلها إلى JSON للفرونت اند
             var categories = await _context.Categories
+                .Include(c => c.Products)
                 .OrderBy(c => c.DisplayOrder)
-                .Select(c => new {
-                    Id = c.Id,
-                    Name = c.Name,
-                    IconClass = c.IconClass,
-                    ColorClass = c.ColorClass,
-                    Products = c.Products.Select(p => new {
-                        Id = p.Id,
-                        Name = p.Name,
-                        BasePrice = p.BasePrice,
-                        ImageUrl = p.ImageUrl,
-                        IsCustomDesign = p.IsCustomDesign
-                    }).ToList()
-                })
                 .ToListAsync();
 
-            var sizes = await _context.Sizes
-                .Select(s => new {
-                    Id = s.Id,
-                    Name = s.Name,
-                    GroupName = s.GroupName,
-                    AdditionalPrice = s.AdditionalPrice
-                })
-                .ToListAsync();
-
-            // إعدادات الـ JSON لمنع أي حلقات مفرغة وللحفاظ على حالة الأحرف
+            // إعدادات JSON لتجنب الـ Reference Loops
             var jsonOptions = new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
@@ -61,6 +64,9 @@ namespace MaestroSport.Controllers
             };
 
             ViewBag.CategoriesJson = JsonSerializer.Serialize(categories, jsonOptions);
+
+            // جلب المقاسات لتحويلها إلى JSON
+            var sizes = await _context.Sizes.OrderBy(s => s.GroupName).ThenBy(s => s.Name).ToListAsync();
             ViewBag.SizesJson = JsonSerializer.Serialize(sizes, jsonOptions);
 
             return View();
@@ -69,132 +75,124 @@ namespace MaestroSport.Controllers
         [HttpGet]
         public async Task<IActionResult> ValidateCoupon(string code)
         {
-            if (string.IsNullOrEmpty(code)) return Json(new { valid = false });
+            if (string.IsNullOrWhiteSpace(code))
+                return Json(new { valid = false });
 
-            string cleanCode = code.Trim().ToUpper();
-
-            // البحث عن الكوبون النشط والذي لم ينتهِ تاريخه بعد
+            var cleanCode = code.Trim().ToUpper();
             var coupon = await _context.Coupons
-                .FirstOrDefaultAsync(c => c.Code == cleanCode && c.IsActive == true);
+                .FirstOrDefaultAsync(c => c.Code == cleanCode && c.IsActive);
 
-            if (coupon != null)
+            if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate.Value.Date >= DateTime.Today))
             {
-                // مقارنة تاريخ اليوم مع تاريخ الانتهاء (بدون ساعات)
-                if (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate.Value.Date >= DateTime.Today)
-                {
-                    return Json(new { valid = true, discount = coupon.DiscountAmount });
-                }
+                return Json(new { valid = true, discount = coupon.DiscountAmount });
             }
 
             return Json(new { valid = false });
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitOrder([FromBody] OrderSubmissionDto dto)
+        public async Task<IActionResult> SubmitOrder([FromForm] OrderSubmissionDto request)
         {
-            if (dto == null || dto.Items.Count == 0)
-                return Json(new { success = false, message = "بيانات الطلب غير مكتملة" });
-
             try
             {
-                var product = await _context.Products.FindAsync(dto.ProductId);
+                var product = await _context.Products.FindAsync(request.ProductId);
                 if (product == null) return Json(new { success = false, message = "الموديل غير موجود" });
 
-                var sizes = await _context.Sizes.ToListAsync();
-                int totalQuantity = dto.Items.Sum(i => i.Quantity);
-                decimal totalAmount = 0;
+                var itemsList = JsonSerializer.Deserialize<List<OrderItemDto>>(request.ItemsJson);
+                if (itemsList == null || !itemsList.Any())
+                    return Json(new { success = false, message = "الطلب فارغ" });
 
-                // إنشاء كائن الطلب مع توفير قيم افتراضية للحقول الإلزامية في DB
+                // تجميع ذكي: دمج الكميات إذا تم إرسال نفس المقاس أكثر من مرة بالخطأ للحفاظ على شكل الفاتورة
+                var groupedItems = itemsList
+                    .GroupBy(i => i.SizeId)
+                    .Select(g => new OrderItemDto
+                    {
+                        SizeId = g.Key,
+                        Quantity = g.Sum(i => i.Quantity)
+                    })
+                    .ToList();
+
                 var order = new Order
                 {
-                    Notes = dto.Notes ?? "",
-                    FabricType = string.IsNullOrEmpty(dto.FabricType) ? "قياسي" : dto.FabricType,
-                    FabricExtraPrice = dto.FabricExtraPrice,
-                    CouponCode = dto.CouponCode?.Trim().ToUpper(),
-                    PhoneNumber = "تأكيد عبر واتساب", // تجنب خطأ NULL في PhoneNumber
-                    CreatedAt = DateTime.Now,
-                    Status = "قيد المراجعة",
-                    OrderItems = new List<OrderItem>()
+                    Notes = request.Notes,
+                    FabricType = request.FabricType,
+                    FabricExtraPrice = request.FabricExtraPrice,
+                    CouponCode = request.CouponCode,
+                    ExpectedDeliveryDate = DateTime.Now.AddDays(14)
                 };
 
-                foreach (var item in dto.Items)
+                // معالجة رفع صورة التصميم الخاص
+                if (request.CustomImage != null && request.CustomImage.Length > 0)
                 {
-                    var size = sizes.FirstOrDefault(s => s.Id == item.SizeId);
+                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "custom_designs");
+                    Directory.CreateDirectory(uploadsFolder);
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + request.CustomImage.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await request.CustomImage.CopyToAsync(fileStream);
+                    }
+                    order.CustomDesignImageUrl = "images/custom_designs/" + uniqueFileName;
+                }
+
+                decimal totalAmount = 0;
+                int totalQty = 0;
+
+                foreach (var item in groupedItems) // استخدام القائمة المجمعة بدلاً من القائمة العادية
+                {
+                    var size = await _context.Sizes.FindAsync(item.SizeId);
                     if (size == null) continue;
 
-                    decimal unitPrice = product.BasePrice + size.AdditionalPrice + dto.FabricExtraPrice;
-
-                    // رسوم التصميم الخاص (+2) إذا كان العدد 10 أو أقل
-                    if (product.IsCustomDesign && totalQuantity <= 10)
-                        unitPrice += 2;
-
+                    decimal unitPrice = product.BasePrice + size.AdditionalPrice;
                     totalAmount += (unitPrice * item.Quantity);
+                    totalQty += item.Quantity;
 
                     order.OrderItems.Add(new OrderItem
                     {
                         ProductId = product.Id,
                         SizeId = size.Id,
                         Quantity = item.Quantity,
-                        UnitPrice = unitPrice,
-                        CustomDesignImageUrl = "" // حل مشكلة الـ NULL التي تسببت في الخطأ بجدول OrderItems
+                        UnitPrice = unitPrice
                     });
                 }
 
-                // إعادة التحقق من الكوبون قبل الحسم النهائي
-                if (!string.IsNullOrEmpty(order.CouponCode))
+                // إضافة سعر القماش لكل قطعة
+                totalAmount += (request.FabricExtraPrice * totalQty);
+
+                // رسوم التصميم
+                if (product.IsCustomDesign && totalQty > 0 && totalQty <= 10)
                 {
-                    var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == order.CouponCode && c.IsActive);
+                    totalAmount += (2 * totalQty);
+                }
+
+                // تطبيق الكوبون
+                if (!string.IsNullOrEmpty(request.CouponCode))
+                {
+                    var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == request.CouponCode && c.IsActive);
                     if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate.Value.Date >= DateTime.Today))
                     {
                         totalAmount -= coupon.DiscountAmount;
                     }
                 }
 
-                order.TotalAmount = totalAmount < 0 ? 0 : totalAmount;
-
-                // حساب تاريخ الاستلام المجدول (15 قطعة يومياً)
-                DateTime deliveryDate = DateTime.Today.AddDays(1);
-                int remaining = totalQuantity;
-                while (remaining > 0)
-                {
-                    int bookedToday = await _context.OrderItems
-                        .Where(oi => oi.Order.ExpectedDeliveryDate.Date == deliveryDate.Date)
-                        .SumAsync(oi => (int?)oi.Quantity) ?? 0;
-
-                    int available = 15 - bookedToday;
-                    if (available > 0) { remaining -= Math.Min(available, remaining); }
-                    if (remaining > 0) deliveryDate = deliveryDate.AddDays(1);
-                }
-                order.ExpectedDeliveryDate = deliveryDate;
+                order.TotalAmount = Math.Max(0, totalAmount);
 
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
-                return Json(new
-                {
-                    success = true,
-                    orderId = order.Id,
-                    totalPrice = order.TotalAmount,
-                    deliveryDate = order.ExpectedDeliveryDate.ToString("yyyy/MM/dd")
-                });
+                return Json(new { success = true, orderId = order.Id, totalPrice = order.TotalAmount, deliveryDate = order.ExpectedDeliveryDate.ToString("yyyy/MM/dd") });
             }
             catch (Exception ex)
             {
-                // تسجيل الخطأ وإرجاع رسالة للمستخدم
-                return Json(new { success = false, message = "حدث خطأ داخلي أثناء حفظ الطلب." });
+                return Json(new { success = false, message = "حدث خطأ داخلي: " + ex.Message });
             }
         }
 
-        // كلاسات نقل البيانات (DTOs)
-        public class OrderSubmissionDto
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
         {
-            public int ProductId { get; set; }
-            public string? Notes { get; set; }
-            public string FabricType { get; set; } = "";
-            public decimal FabricExtraPrice { get; set; }
-            public string? CouponCode { get; set; }
-            public List<OrderItemDto> Items { get; set; } = new();
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        public class OrderItemDto { public int SizeId { get; set; } public int Quantity { get; set; } }
     }
 }

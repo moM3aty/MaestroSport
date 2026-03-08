@@ -1,49 +1,323 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MaestroSport</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MaestroSport.styles.css" asp-append-version="true" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المايسترو للرياضة | المتجر المتكامل</title>
+    <!-- المكتبات الخارجية -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --black: #080808;
+            --royal-blue: #002366;
+            --royal-green: #004225;
+            --dark-grey: #151515;
+            --white: #ffffff;
+        }
+
+        .hidden { display: none !important; }
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--black);
+            color: var(--white);
+            direction: rtl;
+        }
+
+        /* --- Style Guard --- */
+        p, span, label, small, h1, h2, h3, h4, h5, h6, td, th, li {
+            color: var(--white) !important;
+            opacity: 1 !important;
+        }
+        .text-gold, .product-price, #total-price-display, th { color: var(--gold) !important; }
+
+        /* --- UI Improvements for Sizes --- */
+        .size-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .size-pill {
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            min-width: 60px;
+        }
+        .size-pill:hover { border-color: var(--gold); }
+        .size-pill.selected {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--gold);
+            color: var(--gold) !important;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+        .size-pill-price { display: block; font-size: 0.7rem; color: var(--gold) !important; margin-top: 3px; }
+
+        .add-item-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .add-item-btn {
+            background: var(--gold);
+            color: #000 !important;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+        .mini-cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #111;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border-right: 3px solid var(--gold);
+        }
+        .remove-item-btn {
+            background: none;
+            border: none;
+            color: #ff4757 !important;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        /* --- Header --- */
+        header { background: linear-gradient(to bottom, #1a1a1a, var(--black)); padding: 30px; text-align: center; border-bottom: 2px solid var(--gold); }
+        .logo-area { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .main-logo { width: 110px; height: auto; filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.4)); }
+        .text-group h1 { color: var(--gold) !important; font-weight: 900; font-size: 2.5rem; margin: 0; }
+
+        /* --- Announcement Bar --- */
+        .shipping-bar { background: var(--royal-blue); color: var(--gold) !important; padding: 10px 0; border-bottom: 1px solid var(--gold); font-weight: bold; font-size: 1.1rem; }
+        .shipping-bar marquee { color: var(--gold) !important; }
+
+        /* --- Screens --- */
+        .active-screen { display: block; animation: fadeIn 0.5s ease; }
+        @@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- Hero Gate --- */
+        .hero-gate { margin: 50px auto; width: 90%; max-width: 450px; background: var(--royal-green); border: 3px solid var(--gold); border-radius: 25px; padding: 60px 20px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); }
+        .hero-gate:hover { transform: scale(1.03); background: #005631; }
+        .hero-gate i { font-size: 5rem; color: var(--gold) !important; margin-bottom: 20px; }
+        .hero-gate h2 { font-weight: 900; font-size: 1.8rem; }
+
+        .container { padding: 20px; max-width: 1100px; margin: auto; }
+        .section-title { color: var(--gold) !important; text-align: center; margin-bottom: 40px; border-right: 5px solid var(--gold); padding-right: 20px; font-size: 2rem; font-weight: 800; }
+
+        /* --- Grid Systems & Colors --- */
+        .categories-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 25px; }
+        .category-card { background: var(--dark-grey); padding: 30px 20px; border-radius: 20px; text-align: center; cursor: pointer; border: 1px solid #333; transition: 0.3s; }
+        .category-card:hover { border-color: var(--gold); transform: translateY(-8px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.1); }
+        .cat-icon { font-size: 2.8rem; margin-bottom: 15px; }
+        .cat-icon.blue i { color: #3498db !important; }
+        .cat-icon.green i { color: #2ecc71 !important; }
+        .cat-icon.gold i { color: var(--gold) !important; }
+        .cat-icon.red i { color: #e74c3c !important; }
+        .cat-icon.purple i { color: #9b59b6 !important; }
+        .cat-icon.orange i { color: #e67e22 !important; }
+        .cat-icon.cyan i { color: #1abc9c !important; }
+        .cat-icon.pink i { color: #fd79a8 !important; }
+
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
+        .product-item { background: #111; border-radius: 25px; overflow: hidden; border: 1px solid #222; transition: 0.4s; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5); }
+        .product-img { width: 100%; height: 280px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-img img { width: 100%; height: 100%; object-fit: cover; }
+        .product-info { padding: 25px; background: linear-gradient(to top, #000, #111); text-align: center; }
+        .product-info h3 { font-size: 1.4rem; margin-bottom: 12px; }
+        .btn-order { background: #25D366; color: white !important; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer; border: none; width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 1.1rem; }
+
+        /* --- Modal & Forms --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 5000; display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: #151515; border: 2px solid var(--gold); border-radius: 25px; width: 95%; max-width: 550px; padding: 35px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close-modal { position: absolute; top: 20px; left: 20px; font-size: 35px; color: var(--gold) !important; cursor: pointer; }
+
+        .form-section { margin-bottom: 25px; text-align: right; }
+        .form-section label { display: block; margin-bottom: 12px; color: var(--gold) !important; font-weight: bold; font-size: 1.1rem; }
+        textarea, select, .coupon-row input, .qty-input-modern { width: 100%; padding: 14px; background: #000 !important; border: 1px solid var(--gold) !important; color: var(--white) !important; border-radius: 10px; font-family: inherit; font-size: 1.1rem; }
+        .qty-input-modern { width: 80px; text-align: center; font-weight: bold; }
+
+        /* Custom File Input Styling */
+        input[type="file"]::file-selector-button {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .coupon-row { display: flex; gap: 10px; }
+        .coupon-row button { background: var(--gold); border: none; padding: 0 25px; border-radius: 10px; font-weight: bold; cursor: pointer; color: #000 !important; }
+
+        .order-summary { background: #000; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px dashed var(--gold); text-align: right; }
+        .summary-item.total { font-size: 1.6rem; color: var(--gold) !important; font-weight: 900; }
+        .whatsapp-confirm-btn { background: #25D366; color: white !important; width: 100%; padding: 18px; border: none; border-radius: 15px; font-size: 1.3rem; font-weight: bold; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3); }
+
+        .whatsapp-float { position: fixed; bottom: 30px; left: 30px; background: #25D366; color: #fff !important; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .back-btn-small { background: var(--gold); color: #000 !important; border: none; padding: 12px 25px; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 10px; }
+
+        .swal2-container { z-index: 10000 !important; }
+        .swal2-popup { background: #151515 !important; border: 1px solid var(--gold) !important; border-radius: 20px !important; color: #ffffff !important; }
+        .swal2-title, .swal2-html-container { color: #ffffff !important; }
+        .swal2-confirm { background: var(--gold) !important; color: #000 !important; font-weight: 900 !important; border-radius: 10px !important; }
+        .swal2-cancel { background: #333 !important; color: #fff !important; border-radius: 10px !important; }
+
+        .design-fee-notice { background: rgba(212, 175, 55, 0.1); border-right: 5px solid var(--gold); padding: 15px; margin-bottom: 20px; font-size: 1rem; border-radius: 8px; line-height: 1.5; }
+        footer { text-align: center; padding: 50px 20px; margin-top: 60px; background: #000; border-top: 1px solid #222; }
+    </style>
 </head>
 <body>
+
+    <a href="https://wa.me/96892111393" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MaestroSport</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+        <div class="logo-area">
+            <img src="~/images/logo.png" alt="المايسترو" class="main-logo" onerror="this.src='https://placehold.co/120/111/D4AF37?text=M'">
+            <div class="text-group">
+                <h1>المايسترو للرياضة</h1>
+                <p><i class="fas fa-map-marker-alt" style="color:var(--gold) !important;"></i> سلطنة عمان - جعلان بني بوعلي</p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="shipping-bar">
+            <marquee style="text-align:center" behavior="scroll" direction="right" scrollamount="6">@ViewBag.AnnouncementBar</marquee>
+        </div>
+
+        <section id="home-screen" class="active-screen">
+            <div class="hero-gate" onclick="toggleView('categories')">
+                <i class="fas fa-cut"></i>
+                <h2>تفصيل وخياطة الملابس الرياضية</h2>
+                <p>انقر هنا لاستعراض الموديلات والأقسام وبدء الطلب</p>
+            </div>
+        </section>
+
+        <section id="categories-screen" class="hidden">
+            <div class="container">
+                <h2 class="section-title">اختر القسم المطلوب</h2>
+                <div class="categories-grid" id="categories-render"></div>
+                <div style="text-align:center; margin-top:40px;">
+                    <button class="back-btn-small" onclick="toggleView('home')"><i class="fas fa-arrow-right"></i> العودة للرئيسية</button>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+        </section>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - MaestroSport - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <section id="shop-screen" class="hidden">
+            <div class="container">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; border-bottom:1px solid #333; padding-bottom:15px;">
+                    <h2 id="cat-display-name" style="margin:0; border:none;" class="section-title">موديلات</h2>
+                    <button class="back-btn-small" onclick="toggleView('categories')"><i class="fas fa-arrow-right"></i> رجوع</button>
+                </div>
+                <div id="products-list" class="products-grid"></div>
+            </div>
+        </section>
+
+        <!-- نافذة الطلب -->
+        <div id="order-modal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <h2 id="modal-item-name" style="color:var(--gold)!important;">تفاصيل التفصيل</h2>
+
+                <div id="custom-design-alert" class="design-fee-notice hidden">
+                    <i class="fas fa-gem"></i> هذا الموديل (تصميم خاص) يضاف <strong>2 ريال</strong> لرسوم التصميم للقطعة الواحد.<br>
+                    <span style="color:#2ecc71!important; font-size:0.9rem;">(رسوم التصميم مجانية إذا كان الطلب 11 قطعة فأكثر)</span>
+                </div>
+
+                <div class="order-form-body">
+
+                    <!-- واجهة المقاسات المحسنة -->
+                    <div class="form-section">
+                        <label><i class="fas fa-ruler-combined"></i> اختر المقاسات والكميات:</label>
+                        <div id="size-pills-container" class="size-pills-container">
+                            <!-- سيتم تعبئة الأزرار هنا عبر الجافاسكريبت -->
+                        </div>
+
+                        <div class="add-item-row">
+                            <input type="number" id="current-qty" class="qty-input-modern" min="1" value="1">
+                            <button type="button" class="add-item-btn" onclick="addSelectedSize()">
+                                <i class="fas fa-plus"></i> إضافة للسلة
+                            </button>
+                        </div>
+
+                        <!-- سلة القطع المصغرة -->
+                        <div id="mini-cart-container" style="margin-top: 15px; border-top: 1px dashed #333; padding-top: 10px;">
+                            <!-- القطع المضافة ستظهر هنا -->
+                        </div>
+                    </div>
+
+                    <!-- إرفاق صورة للتصميم الخاص -->
+                    <div id="custom-image-section" class="form-section hidden" style="background: rgba(212, 175, 55, 0.05); padding: 15px; border-radius: 12px; border: 1px solid var(--gold);">
+                        <label><i class="fas fa-image"></i> إرفاق صورة للتصميم (اختياري):</label>
+                        <input type="file" id="custom-image-input" accept="image/*" class="form-control" style="padding: 10px;">
+                        <small style="color: var(--text-dim); display: block; margin-top: 5px;">ارفق صورة الشعار أو الفكرة التي تريد تنفيذها.</small>
+                    </div>
+
+                    <div class="form-section">
+                        <label><i class="fas fa-scroll"></i> نوع القماش:</label>
+                        <select id="fabric-select" onchange="calculateLiveTotal()">
+                            <option value="0" data-name="قماش رياضي قياسي">قماش رياضي قياسي (مشمول)</option>
+                            <option value="3" data-name="قماش ديواني ملكي">قماش ديواني ملكي (+3 ريال)</option>
+                            <option value="5" data-name="قماش نخب أول أصلي">قماش نخب أول أصلي (+5 ريال)</option>
+                            <option value="2" data-name="قماش تبريد مسامي">قماش تبريد مسامي (+2 ريال)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-section">
+                        <label><i class="fas fa-pen"></i> ملاحظات خاصة (الأسماء، الأرقام):</label>
+                        <textarea id="order-notes" rows="2" placeholder="اكتب ملاحظاتك، قياساتك، أو أي طلب خاص هنا..."></textarea>
+                    </div>
+
+                    <div class="form-section coupon-row">
+                        <input type="text" id="coupon-input" placeholder="كود الخصم">
+                        <button type="button" id="apply-coupon-btn" onclick="applyCouponLogic()">تطبيق</button>
+                    </div>
+
+                    <div class="order-summary">
+                        <div class="summary-item total">الإجمالي التقريبي: <span id="total-price-display">0</span> ريال</div>
+                        <small style="font-size:0.85rem;">* السعر النهائي وموعد الاستلام يتحدد بعد الحفظ</small>
+                    </div>
+
+                    <button class="whatsapp-confirm-btn" onclick="submitOrderProcess()" id="submit-btn">
+                        <i class="fab fa-whatsapp"></i> اعتماد الطلب وإرسال للواتساب
+                    </button>
+                </div>
+            </div>
         </div>
+
+    </main>
+
+    <footer>
+        <p>© 2024 المايسترو للرياضة - جعلان بني بوعلي | خيارك الأول للأناقة الرياضية</p>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        const categoriesData = @Html.Raw(ViewBag.CategoriesJson ?? "[]");
+        const sizesData = @Html.Raw(ViewBag.SizesJson ?? "[]");
+    </script>
+    <script src="~/js/script.js"></script>
 </body>
 </html>
