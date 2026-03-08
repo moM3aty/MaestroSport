@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link href="~/images/logo.png" rel="icon" type="image/x-icon" />
 
     <style>
         /* ==========================================================================
@@ -52,7 +53,24 @@
             overflow-x: hidden;
             background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.03) 0%, transparent 50%);
         }
-
+         ::-webkit-scrollbar {
+            width: 8px; /* عرض شريط التمرير العمودي */
+            height: 8px; /* ارتفاع شريط التمرير الأفقي */
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base); /* لون مسار شريط التمرير */
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark); /* اللون الأساسي للمؤشر */
+            border-radius: 10px; /* جعل حواف المؤشر دائرية */
+            border: 2px solid var(--bg-base); /* مسافة بين المؤشر والمسار */
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold); /* لون المؤشر عند تمرير الماوس عليه */
+        }
         .text-gold {
             color: var(--gold) !important;
         }
@@ -219,6 +237,8 @@
             width: 100%;
             display: block;
             transition: transform 0.5s;
+            height: 100%;
+            max-height:600px;
         }
 
         .hero-banner-container:hover .hero-banner-img {

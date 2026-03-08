@@ -37,17 +37,23 @@
         }
 
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px; /* عرض شريط التمرير العمودي */
+            height: 8px; /* ارتفاع شريط التمرير الأفقي */
         }
 
         ::-webkit-scrollbar-track {
-            background: var(--black);
+            background: var(--bg-base); /* لون مسار شريط التمرير */
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--gold);
-            border-radius: 10px;
+            background: var(--gold-dark); /* اللون الأساسي للمؤشر */
+            border-radius: 10px; /* جعل حواف المؤشر دائرية */
+            border: 2px solid var(--bg-base); /* مسافة بين المؤشر والمسار */
         }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--gold); /* لون المؤشر عند تمرير الماوس عليه */
+            }
 
         .admin-wrapper {
             display: flex;
