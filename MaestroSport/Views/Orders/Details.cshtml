@@ -1,0 +1,341 @@
+﻿@model MaestroSport.Models.Order
+@{
+    ViewData["Title"] = "تفاصيل الطلب #" + Model.Id;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    /* --- Premium Screen Style (العرض على الشاشة) --- */
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .detail-label {
+        color: var(--gold);
+        font-weight: bold;
+    }
+
+    .detail-value {
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    /* --- Professional Invoice Print CSS (تنسيق الطباعة الاحترافي) --- */
+    @@media print {
+        .sidebar, .top-bar, .no-print, .btn-premium, form, .menu-toggle
+
+    {
+        display: none !important;
+    }
+
+    .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        background: #fff !important;
+    }
+
+    body {
+        background: #fff !important;
+        color: #000 !important;
+        font-family: 'Cairo', sans-serif;
+        padding: 10px;
+    }
+
+    .card-premium {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        color: #000 !important;
+        padding: 0 !important;
+        margin-bottom: 20px !important;
+    }
+
+    .print-invoice-container {
+        display: block !important;
+        border: 2px solid #000;
+        padding: 30px;
+        position: relative;
+    }
+
+    .invoice-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 4px double #000;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+        .invoice-header h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin: 0;
+            color: #000 !important;
+        }
+
+    .invoice-info-box {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .info-group {
+        border: 1px solid #000;
+        padding: 15px;
+    }
+
+        .info-group h5 {
+            background: #f0f0f0;
+            margin: -15px -15px 10px -15px;
+            padding: 8px;
+            border-bottom: 1px solid #000;
+            font-weight: 900;
+            text-align: center;
+            color: #000 !important;
+        }
+
+    table {
+        width: 100%;
+        border-collapse: collapse !important;
+        margin-top: 20px;
+    }
+
+    th {
+        background: #f2f2f2 !important;
+        border: 1px solid #000 !important;
+        padding: 12px !important;
+        color: #000 !important;
+        font-weight: 900 !important;
+        text-align: center !important;
+    }
+
+    td {
+        border: 1px solid #000 !important;
+        padding: 10px !important;
+        color: #000 !important;
+        text-align: center !important;
+    }
+
+    .total-section {
+        margin-top: 30px;
+        float: left;
+        width: 300px;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        font-size: 1.1rem;
+        color: #000 !important;
+    }
+
+    .grand-total-row {
+        border-top: 2px solid #000;
+        margin-top: 10px;
+        padding-top: 10px;
+        font-size: 1.4rem;
+        font-weight: 900;
+    }
+
+    .footer-note {
+        margin-top: 80px;
+        text-align: center;
+        border-top: 1px solid #000;
+        padding-top: 10px;
+        font-size: 12px;
+        clear: both;
+        color: #000 !important;
+    }
+
+    span, p, h4 {
+        color: #000 !important;
+    }
+
+    }
+
+    .print-only {
+        display: none;
+    }
+</style>
+
+<!-- الفاتورة الرسمية (تظهر عند الطباعة فقط) -->
+<div class="print-only print-invoice-container">
+    <div class="invoice-header">
+        <div>
+            <h1>المايسترو للرياضة</h1>
+            <p>سلطنة عمان - جعلان بني بوعلي</p>
+        </div>
+        <div style="text-align: left;">
+            <h2 style="margin:0; color: #000 !important;">فاتورة طلب تفصيل</h2>
+            <p>رقم الفاتورة: #@Model.Id</p>
+        </div>
+    </div>
+
+    <div class="invoice-info-box">
+        <div class="info-group">
+            <h5>بيانات الطلب</h5>
+            <p><strong>تاريخ الطلب:</strong> @Model.CreatedAt.ToString("yyyy/MM/dd")</p>
+            <p><strong>موعد التسليم المتوقع:</strong> @Model.ExpectedDeliveryDate.ToString("yyyy/MM/dd")</p>
+            <p><strong>حالة الطلب:</strong> @Model.Status</p>
+        </div>
+        <div class="info-group">
+            <h5>ملاحظات إضافية</h5>
+            <p>@(string.IsNullOrEmpty(Model.Notes) ? "لا توجد ملاحظات خاصة" : Model.Notes)</p>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>الموديل</th>
+                <th>المقاس</th>
+                <th>الكمية</th>
+                <th>سعر الوحدة</th>
+                <th>الإجمالي الفرعي</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderItems)
+            {
+                <tr>
+                    <td>@(item.Product?.Name ?? "موديل غير معروف")</td>
+                    <td>@(item.Size?.Name ?? "N/A")</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.UnitPrice ر.ع</td>
+                    <td>@(item.UnitPrice* item.Quantity) ر.ع</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="total-section">
+        <div class="total-row">
+            <span>إجمالي القطع:</span>
+            <span>@(Model.OrderItems.Sum(i => i.UnitPrice * i.Quantity)) ر.ع</span>
+        </div>
+        <div class="total-row">
+            <span>إضافة القماش (@Model.FabricType):</span>
+            <span>@Model.FabricExtraPrice ر.ع</span>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.CouponCode))
+        {
+            <div class="total-row">
+                <span>خصم الكوبون (@Model.CouponCode):</span>
+                <span style="direction: ltr;">- @(Model.OrderItems.Sum(i => i.UnitPrice * i.Quantity) + Model.FabricExtraPrice - Model.TotalAmount) ر.ع</span>
+            </div>
+        }
+        <div class="total-row grand-total-row">
+            <span>الإجمالي النهائي:</span>
+            <span>@Model.TotalAmount ر.ع</span>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        شكراً لاختياركم المايسترو للرياضة - بضاعتكم أمانة في أيدينا
+    </div>
+</div>
+
+<!-- واجهة العرض في لوحة التحكم (تختفي عند الطباعة) -->
+<div class="no-print">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h2 style="font-weight: 900; color: var(--gold); letter-spacing: -1px;">إدارة تفاصيل الطلب</h2>
+            <p style="color: #ffffff; opacity: 0.8;">معرف الطلب الفريد: <span style="color: var(--gold); font-weight: bold;">#@Model.Id</span></p>
+        </div>
+        <div style="display: flex; gap: 15px;">
+            <a href="/Orders" class="btn-premium btn-outline"><i class="fas fa-arrow-right ms-2"></i> القائمة</a>
+            <button onclick="window.print()" class="btn-premium btn-gold"><i class="fas fa-print ms-2"></i> طباعة الفاتورة</button>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px;">
+        <!-- ملخص الطلب والحالة -->
+        <div class="card-premium">
+            <h4 style="color: var(--gold); border-bottom: 1px solid var(--accent); padding-bottom: 15px; margin-bottom: 20px;">
+                <i class="fas fa-info-circle ms-2"></i> معلومات الطلب
+            </h4>
+            <div class="detail-row"><span class="detail-label">تاريخ الطلب:</span><span class="detail-value">@Model.CreatedAt.ToString("yyyy/MM/dd HH:mm")</span></div>
+            <div class="detail-row"><span class="detail-label">موعد التسليم:</span><span class="detail-value" style="color: #3498db;">@Model.ExpectedDeliveryDate.ToString("yyyy/MM/dd")</span></div>
+            <div class="detail-row"><span class="detail-label">نوع القماش:</span><span class="detail-value">@Model.FabricType</span></div>
+            <div class="detail-row"><span class="detail-label">كود الخصم:</span><span class="detail-value">@(string.IsNullOrEmpty(Model.CouponCode) ? "لا يوجد" : Model.CouponCode)</span></div>
+            <div class="detail-row" style="border:none;"><span class="detail-label">حالة الطلب:</span><span class="badge @(Model.Status == "قيد المراجعة" ? "badge-pending" : "badge-success")">@Model.Status</span></div>
+
+            <form asp-action="UpdateStatus" method="post" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--accent);">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div style="display: flex; gap: 10px;">
+                    <select name="status" class="form-control" style="flex: 1;">
+                        <option value="قيد المراجعة" selected="@(Model.Status == "قيد المراجعة")">قيد المراجعة</option>
+                        <option value="جاري التفصيل" selected="@(Model.Status == "جاري التفصيل")">جاري التفصيل</option>
+                        <option value="جاهز للاستلام" selected="@(Model.Status == "جاهز للاستلام")">جاهز للاستلام</option>
+                        <option value="تم التسليم" selected="@(Model.Status == "تم التسليم")">تم التسليم</option>
+                    </select>
+                    <button type="submit" class="btn-premium btn-gold" style="padding: 10px 20px;">تحديث</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- الملاحظات والحسابات -->
+        <div class="card-premium">
+            <h4 style="color: var(--gold); border-bottom: 1px solid var(--accent); padding-bottom: 15px; margin-bottom: 20px;">
+                <i class="fas fa-wallet ms-2"></i> الملاحظات والحساب المالي
+            </h4>
+            <div class="form-group">
+                <label class="form-label">ملاحظات الزبون:</label>
+                <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; min-height: 80px; border: 1px solid #333;">
+                    @(string.IsNullOrEmpty(Model.Notes) ? "لا توجد ملاحظات إضافية.." : Model.Notes)
+                </div>
+            </div>
+            <div style="margin-top: 25px; background: var(--accent); padding: 20px; border-radius: 15px; border-right: 5px solid var(--gold);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="opacity: 0.8;">الإجمالي قبل الخصم:</span>
+                    <span style="font-weight: bold;">@(Model.OrderItems.Sum(i => i.UnitPrice * i.Quantity) + Model.FabricExtraPrice) ر.ع</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 1.4rem; font-weight: 900;">
+                    <span style="color: var(--gold);">الإجمالي النهائي:</span>
+                    <span style="color: var(--gold);">@Model.TotalAmount ر.ع</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول محتويات الطلب -->
+    <div class="card-premium" style="margin-top: 25px;">
+        <h4 style="color: var(--gold); margin-bottom: 20px;"><i class="fas fa-list-ul ms-2"></i> قائمة القطع المطلوبة للتفصيل</h4>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="text-align: right;">الموديل</th>
+                        <th>المقاس</th>
+                        <th>الكمية</th>
+                        <th>سعر الوحدة</th>
+                        <th style="text-align: left;">الإجمالي الفرعي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <tr>
+                            <td style="text-align: right;">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <img src="/@item.Product?.ImageUrl" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover; border: 1px solid #333;" onerror="this.src='https://placehold.co/100/111/D4AF37?text=M'" />
+                                    <span style="font-weight: bold;">@(item.Product?.Name ?? "موديل محذوف")</span>
+                                </div>
+                            </td>
+                            <td><span class="badge" style="background: rgba(212,175,55,0.1); color: var(--gold); border: 1px solid var(--gold);">@(item.Size?.Name ?? "N/A")</span></td>
+                            <td style="font-weight: bold; font-size: 1.1rem;">@item.Quantity</td>
+                            <td>@item.UnitPrice ر.ع</td>
+                            <td style="text-align: left; font-weight: 900; color: var(--gold);">@(item.UnitPrice* item.Quantity) ر.ع</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

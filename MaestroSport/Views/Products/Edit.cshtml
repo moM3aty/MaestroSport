@@ -1,0 +1,118 @@
+﻿@model MaestroSport.Models.Product
+
+@{
+    ViewData["Title"] = "تعديل بيانات الموديل";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div style="max-width: 900px; margin: 0 auto;">
+    <!-- الرأس -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h2 style="font-weight: 900; color: var(--gold); letter-spacing: -1px;">تعديل الموديل الملكي</h2>
+            <p style="color: #ffffff; opacity: 0.8;">تحديث بيانات الموديل: <span style="color: var(--gold); font-weight: bold;">@Model.Name</span></p>
+        </div>
+        <a asp-action="Index" class="btn-premium btn-outline">
+            <i class="fas fa-arrow-right" style="margin-left: 8px;"></i> العودة للكتالوج
+        </a>
+    </div>
+
+    <div class="card-premium">
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-4" style="font-weight: bold;"></div>
+
+            <!-- الحقول المخفية -->
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ImageUrl" />
+
+            <div class="form-group">
+                <label asp-for="Name" class="form-label">اسم الموديل (يظهر للزبائن)</label>
+                <input asp-for="Name" class="form-control" placeholder="مثال: طقم المايسترو الذهبي 2024" />
+                <span asp-validation-for="Name" class="text-danger" style="font-size: 0.85rem;"></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px;">
+                <div class="form-group">
+                    <label asp-for="CategoryId" class="form-label">القسم التابع له</label>
+                    <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId" style="cursor: pointer;">
+                        <option value="">-- اختر القسم --</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="BasePrice" class="form-label">السعر الأساسي (ريال عماني)</label>
+                    <div style="position: relative;">
+                        <input asp-for="BasePrice" type="number" step="0.1" class="form-control" style="padding-left: 45px;" />
+                        <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gold); font-weight: bold;">ر.ع</span>
+                    </div>
+                    <span asp-validation-for="BasePrice" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- قسم الصورة -->
+            <div class="form-group" style="margin-top: 20px;">
+                <label class="form-label"><i class="fas fa-image" style="margin-left: 8px;"></i> صورة الموديل</label>
+
+                <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; background: rgba(255,255,255,0.02); padding: 20px; border-radius: 15px; border: 1px solid var(--accent);">
+                    <!-- معاينة الصورة الحالية -->
+                    <div style="text-align: center;">
+                        <p style="font-size: 0.75rem; color: var(--gold); margin-bottom: 8px;">الصورة الحالية</p>
+                        <img src="/@Model.ImageUrl" id="currentImagePreview"
+                             style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; border: 2px solid var(--gold); box-shadow: 0 5px 15px rgba(0,0,0,0.5);"
+                             onerror="this.src='https://placehold.co/120/111/D4AF37?text=M'" />
+                    </div>
+
+                    <!-- اختيار صورة جديدة -->
+                    <div style="flex: 1; min-width: 250px;">
+                        <p style="font-size: 0.85rem; color: #fff; margin-bottom: 10px;">رفع صورة جديدة (اختياري)</p>
+                        <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" onchange="previewNewImage(this)" />
+                        <small style="color: #ffffff; opacity: 0.6; display: block; margin-top: 8px;">سيتم الحفاظ على الصورة القديمة إذا لم يتم اختيار ملف جديد.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- خيار التصميم الخاص -->
+            <div class="form-group" style="background: rgba(212, 175, 55, 0.05); padding: 20px; border-radius: 15px; border: 1px dashed var(--gold); margin-top: 30px;">
+                <label style="display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                    <input asp-for="IsCustomDesign" type="checkbox" style="width: 22px; height: 22px; accent-color: var(--gold); cursor: pointer;" />
+                    <div>
+                        <span style="font-weight: 900; color: var(--gold); font-size: 1.1rem;">تفعيل كـ "تصميم خاص"</span>
+                        <p style="font-size: 0.85rem; margin: 0; color: #ffffff;">عند التفعيل، سيتم إضافة 2 ريال رسوم تصميم تلقائياً للطلبات (10 قطع فأقل).</p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- أزرار التحكم -->
+            <div style="display: flex; gap: 15px; margin-top: 40px; padding-top: 25px; border-top: 1px solid var(--accent);">
+                <button type="submit" class="btn-premium btn-gold" style="padding: 15px 50px; font-size: 1.1rem; flex: 1; justify-content: center;">
+                    <i class="fas fa-save" style="margin-left: 10px;"></i> حفظ التغييرات الملكية
+                </button>
+                <a asp-action="Index" class="btn-premium btn-outline" style="padding: 15px 30px;">
+                    إلغاء التعديل
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // دالة لمعاينة الصورة الجديدة قبل الحفظ
+        function previewNewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById('currentImagePreview');
+                    img.src = e.target.result;
+                    img.style.borderColor = "#2ecc71"; // تغيير لون الإطار للأخضر كإشارة للتغيير
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

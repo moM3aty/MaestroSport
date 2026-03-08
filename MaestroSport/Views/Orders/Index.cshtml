@@ -1,0 +1,53 @@
+﻿@model IEnumerable<MaestroSport.Models.Order>
+@{
+    ViewData["Title"] = "إدارة الطلبات";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card-premium">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h3 style="font-weight: 900;">سجل الطلبات الملكي</h3>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">تتبع وإدارة كافة طلبات التفصيل للزبائن</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-premium btn-outline" style="border-color: #333; color: #fff;">تصفية النتائج <i class="fas fa-filter"></i></button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>المعرف</th>
+                    <th>تاريخ الطلب</th>
+                    <th>نوع القماش</th>
+                    <th>المبلغ</th>
+                    <th>تاريخ الاستلام</th>
+                    <th>الحالة</th>
+                    <th style="text-align: left;">إجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="font-weight: 900; color: var(--gold);">#@item.Id</td>
+                        <td>@item.CreatedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                        <td><span style="background: rgba(212, 175, 55, 0.1); padding: 4px 10px; border-radius: 5px;">@item.FabricType</span></td>
+                        <td style="font-weight: bold;">@item.TotalAmount ر.ع</td>
+                        <td style="color: #3498db; font-weight: bold;">@item.ExpectedDeliveryDate.ToString("yyyy/MM/dd")</td>
+                        <td>
+                            <span class="badge @(item.Status == "قيد المراجعة" ? "badge-pending" : "badge-success")">
+                                @item.Status
+                            </span>
+                        </td>
+                        <td style="text-align: left;">
+                            <a href="/Orders/Details/@item.Id" class="btn-premium btn-gold" style="padding: 8px 15px;"><i class="fas fa-receipt"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

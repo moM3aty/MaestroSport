@@ -1,0 +1,78 @@
+﻿@model IEnumerable<MaestroSport.Models.Order>
+@{
+    ViewData["Title"] = "لوحة القيادة";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div>
+            <p class="stat-label">سعة اليوم</p>
+            <p class="stat-val">@ViewBag.CapacityLeft <span style="font-size: 1rem; color: var(--text-dim); font-weight: normal;">/ 15</span></p>
+        </div>
+        <i class="fas fa-bolt fa-2x" style="color: #f1c40f;"></i>
+    </div>
+    <div class="stat-card" style="border-right-color: #2ecc71;">
+        <div>
+            <p class="stat-label">طلبات المراجعة</p>
+            <p class="stat-val">@ViewBag.PendingOrders</p>
+        </div>
+        <i class="fas fa-clock fa-2x" style="color: #2ecc71;"></i>
+    </div>
+    <div class="stat-card" style="border-right-color: #3498db;">
+        <div>
+            <p class="stat-label">إجمالي الموديلات</p>
+            <p class="stat-val">@ViewBag.TotalProducts</p>
+        </div>
+        <i class="fas fa-tshirt fa-2x" style="color: #3498db;"></i>
+    </div>
+    <!-- إضافة كارت المقاسات المفقود -->
+    <div class="stat-card" style="border-right-color: var(--gold);">
+        <div>
+            <p class="stat-label">أنواع المقاسات</p>
+            <p class="stat-val">@ViewBag.TotalSizes</p>
+        </div>
+        <i class="fas fa-ruler-combined fa-2x" style="color: var(--gold);"></i>
+    </div>
+</div>
+
+<div class="card-premium">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h3 style="font-weight: 900;"><i class="fas fa-history text-gold" style="margin-left: 10px;"></i> آخر الطلبات</h3>
+        <a href="/Orders" class="btn-premium btn-outline">إدارة الكل</a>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>رقم الطلب</th>
+                    <th>التاريخ</th>
+                    <th>المبلغ</th>
+                    <th>موعد التسليم</th>
+                    <th>الحالة</th>
+                    <th style="text-align: left;">إجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="font-weight: 800; color: var(--gold);">#@item.Id</td>
+                        <td>@item.CreatedAt.ToString("yyyy/MM/dd")</td>
+                        <td style="font-weight: bold;">@item.TotalAmount ر.ع</td>
+                        <td><span style="color: #3498db; font-weight: bold;">@item.ExpectedDeliveryDate.ToString("yyyy/MM/dd")</span></td>
+                        <td>
+                            <span class="badge @(item.Status == "قيد المراجعة" ? "badge-pending" : "badge-success")">
+                                @item.Status
+                            </span>
+                        </td>
+                        <td style="text-align: left;">
+                            <a href="/Orders/Details/@item.Id" class="btn-premium btn-gold" style="padding: 8px 15px;"><i class="fas fa-eye"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

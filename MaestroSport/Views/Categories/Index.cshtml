@@ -1,0 +1,77 @@
+﻿@model IEnumerable<MaestroSport.Models.Category>
+@{
+    ViewData["Title"] = "إدارة الأقسام";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card-premium">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h3 style="font-weight: 900; color: var(--gold);">هيكلية الأقسام الملكية</h3>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">نظم موديلاتك في تصنيفات رياضية جذابة وسهلة الوصول</p>
+        </div>
+        <a href="/Categories/Create" class="btn-premium btn-gold">
+            <i class="fas fa-plus-circle"></i> إضافة قسم جديد
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 80px;">الترتيب</th>
+                    <th>اسم القسم</th>
+                    <th>الأيقونة المختارة</th>
+                    <th>اللون التعريفي</th>
+                    <th style="text-align: left;">الإجراءات الإدارية</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="font-weight: 900; color: var(--gold); text-align: center; font-size: 1.2rem;">
+                            #@item.DisplayOrder
+                        </td>
+                        <td>
+                            <span style="font-weight: 800; font-size: 1.1rem; letter-spacing: 0.5px;">@item.Name</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 8px 15px; border-radius: 10px; width: fit-content;">
+                                <i class="fas @item.IconClass fa-lg" style="color: @(item.ColorClass == "gold" ? "#D4AF37" : item.ColorClass);"></i>
+                                <span style="color: var(--text-dim); font-family: monospace; font-size: 0.8rem;">@item.IconClass</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 18px; height: 18px; border-radius: 50%; background-color: @(item.ColorClass == "gold" ? "#D4AF37" : item.ColorClass); border: 2px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>
+                                <span style="font-weight: 600; text-transform: capitalize;">@item.ColorClass</span>
+                            </div>
+                        </td>
+                        <td style="text-align: left;">
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                <a href="/Categories/Edit/@item.Id" class="btn-premium btn-outline" style="padding: 8px 12px;" title="تعديل">
+                                    <i class="fas fa-pen-fancy"></i>
+                                </a>
+                                <a href="/Categories/Delete/@item.Id" class="btn-premium btn-outline"
+                                   style="padding: 8px 12px; border-color: #ff4757; color: #ff4757;"
+                                   onclick="return confirm('هل أنت متأكد من حذف هذا القسم؟ سيتم حذف كافة المنتجات التابعة له!')" title="حذف">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 60px; color: var(--text-dim);">
+                            <i class="fas fa-folder-open fa-3x" style="display: block; margin-bottom: 15px; opacity: 0.2;"></i>
+                            لا توجد أقسام مضافة حالياً.. ابدأ بإضافة أول قسم لمتجرك
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

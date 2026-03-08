@@ -1,0 +1,59 @@
+﻿@model IEnumerable<MaestroSport.Models.Product>
+@{
+    ViewData["Title"] = "كتالوج الموديلات";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card-premium">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h3 style="font-weight: 900;">إدارة التصاميم</h3>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">إجمالي الموديلات المتاحة: @Model.Count()</p>
+        </div>
+        <a href="/Products/Create" class="btn-premium btn-gold"><i class="fas fa-plus"></i> إضافة موديل ملكي</a>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>الموديل</th>
+                    <th>القسم</th>
+                    <th>السعر</th>
+                    <th>تصميم خاص</th>
+                    <th style="text-align: left;">خيارات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <img src="/@item.ImageUrl" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover; border: 1px solid var(--gold);" onerror="this.src='https://placehold.co/100/111/D4AF37?text=M'" />
+                                <span style="font-weight: bold;">@item.Name</span>
+                            </div>
+                        </td>
+                        <td><span style="color: var(--text-dim);">@item.Category.Name</span></td>
+                        <td style="color: var(--gold); font-weight: bold;">@item.BasePrice ر.ع</td>
+                        <td>
+                            @if (item.IsCustomDesign)
+                            {
+                                <i class="fas fa-gem text-gold"></i>
+                            }
+                            else
+                            {
+
+                                <span style="color: #444;">عادي</span>
+                            }
+                        </td>
+                        <td style="text-align: left;">
+                            <a href="/Products/Edit/@item.Id" class="btn-premium btn-outline" style="padding: 8px;"><i class="fas fa-edit"></i></a>
+                            <a href="/Products/Delete/@item.Id" class="btn-premium btn-outline" style="padding: 8px; border-color: #ff4757; color: #ff4757;"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

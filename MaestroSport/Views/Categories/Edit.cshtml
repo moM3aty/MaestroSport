@@ -1,0 +1,233 @@
+﻿@model MaestroSport.Models.Category
+
+@{
+    ViewData["Title"] = "تعديل القسم";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    /* تحسين واجهة اختيار الأيقونات لتكون Premium */
+    .icon-picker-container {
+        background-color: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--accent);
+        border-radius: 15px;
+        padding: 20px;
+    }
+
+    .icon-picker-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 12px;
+        max-height: 280px;
+        overflow-y: auto;
+        padding: 5px;
+    }
+
+        /* تخصيص Scrollbar الخاص بمختبر الأيقونات */
+        .icon-picker-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .icon-picker-grid::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
+        }
+
+    .icon-option {
+        font-size: 1.5rem;
+        padding: 15px;
+        border-radius: 12px;
+        cursor: pointer;
+        color: #888;
+        border: 1px solid #333;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #111;
+    }
+
+        .icon-option:hover {
+            background-color: #1a1a1a;
+            border-color: var(--gold);
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .icon-option.selected {
+            background: rgba(212, 175, 55, 0.15);
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+    .color-preview-box {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: rgba(255,255,255,0.02);
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid var(--accent);
+    }
+
+    .color-circle {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+</style>
+
+<div style="max-width: 900px; margin: 0 auto;">
+    <!-- الرأس -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h2 style="font-weight: 900; color: var(--gold); letter-spacing: -1px;">تعديل القسم الملكي</h2>
+            <p style="color: #ffffff; opacity: 0.8;">تحديث بيانات القسم: <span style="color: var(--gold); font-weight: bold;">@Model.Name</span></p>
+        </div>
+        <a asp-action="Index" class="btn-premium btn-outline">
+            <i class="fas fa-arrow-right" style="margin-left: 8px;"></i> العودة للأقسام
+        </a>
+    </div>
+
+    <div class="card-premium">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-4" style="font-weight: bold;"></div>
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group">
+                <label asp-for="Name" class="form-label">اسم القسم الرياضي</label>
+                <input asp-for="Name" class="form-control" placeholder="مثال: أطقم تدريب، بدلات رسمية..." />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <!-- اختيار الأيقونة -->
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-icons" style="margin-left: 8px;"></i> أيقونة القسم (اختر من القائمة)</label>
+                <input asp-for="IconClass" type="hidden" id="IconClassInput" />
+
+                <div class="icon-picker-container">
+                    <div class="icon-picker-grid">
+                        <!-- ملابس -->
+                        <div class="icon-option" data-icon="fa-tshirt"><i class="fas fa-tshirt"></i></div>
+                        <div class="icon-option" data-icon="fa-shirt"><i class="fas fa-shirt"></i></div>
+                        <div class="icon-option" data-icon="fa-user-ninja"><i class="fas fa-user-ninja"></i></div>
+                        <div class="icon-option" data-icon="fa-mitten"><i class="fas fa-mitten"></i></div>
+                        <div class="icon-option" data-icon="fa-socks"><i class="fas fa-socks"></i></div>
+                        <div class="icon-option" data-icon="fa-shoe-prints"><i class="fas fa-shoe-prints"></i></div>
+                        <div class="icon-option" data-icon="fa-hat-cowboy"><i class="fas fa-hat-cowboy"></i></div>
+                        <div class="icon-option" data-icon="fa-vest"><i class="fas fa-vest"></i></div>
+
+                        <!-- رياضة -->
+                        <div class="icon-option" data-icon="fa-running"><i class="fas fa-running"></i></div>
+                        <div class="icon-option" data-icon="fa-futbol"><i class="fas fa-futbol"></i></div>
+                        <div class="icon-option" data-icon="fa-basketball-ball"><i class="fas fa-basketball-ball"></i></div>
+                        <div class="icon-option" data-icon="fa-volleyball-ball"><i class="fas fa-volleyball-ball"></i></div>
+                        <div class="icon-option" data-icon="fa-dumbbell"><i class="fas fa-dumbbell"></i></div>
+                        <div class="icon-option" data-icon="fa-medal"><i class="fas fa-medal"></i></div>
+                        <div class="icon-option" data-icon="fa-trophy"><i class="fas fa-trophy"></i></div>
+                        <div class="icon-option" data-icon="fa-stopwatch"><i class="fas fa-stopwatch"></i></div>
+                        <div class="icon-option" data-icon="fa-swimmer"><i class="fas fa-swimmer"></i></div>
+                        <div class="icon-option" data-icon="fa-biking"><i class="fas fa-biking"></i></div>
+                        <div class="icon-option" data-icon="fa-table-tennis"><i class="fas fa-table-tennis"></i></div>
+                        <div class="icon-option" data-icon="fa-fist-raised"><i class="fas fa-fist-raised"></i></div>
+                        <div class="icon-option" data-icon="fa-heartbeat"><i class="fas fa-heartbeat"></i></div>
+                        <div class="icon-option" data-icon="fa-flag-checkered"><i class="fas fa-flag-checkered"></i></div>
+                        <div class="icon-option" data-icon="fa-crown"><i class="fas fa-crown"></i></div>
+                        <div class="icon-option" data-icon="fa-star"><i class="fas fa-star"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-top: 20px;">
+                <div class="form-group">
+                    <label asp-for="ColorClass" class="form-label">لون تمييز الأيقونة</label>
+                    <select asp-for="ColorClass" class="form-control">
+                        <option value="gold">ذهبي المايسترو</option>
+                        <option value="blue">أزرق احترافي</option>
+                        <option value="green">أخضر حيوي</option>
+                        <option value="red">أحمر ناري</option>
+                        <option value="purple">بنفسجي فخم</option>
+                        <option value="orange">برتقالي مشرق</option>
+                        <option value="cyan">سماوي عصري</option>
+                        <option value="pink">وردي شبابي</option>
+                    </select>
+                    <div class="mt-3 color-preview-box">
+                        <span style="font-size: 0.85rem; color: #fff;">معاينة اللون:</span>
+                        <div class="color-circle"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="DisplayOrder" class="form-label">ترتيب الظهور في الموقع</label>
+                    <input asp-for="DisplayOrder" type="number" class="form-control" />
+                    <small style="color: var(--text-dim);">الأرقام الأصغر تظهر أولاً.</small>
+                </div>
+            </div>
+
+            <!-- أزرار التحكم -->
+            <div style="display: flex; gap: 15px; margin-top: 40px; padding-top: 25px; border-top: 1px solid var(--accent);">
+                <button type="submit" class="btn-premium btn-gold" style="padding: 15px 50px; font-size: 1.1rem; flex: 1; justify-content: center;">
+                    <i class="fas fa-save" style="margin-left: 10px;"></i> تحديث القسم الآن
+                </button>
+                <a asp-action="Index" class="btn-premium btn-outline" style="padding: 15px 30px;">
+                    إلغاء
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const iconOptions = document.querySelectorAll('.icon-option');
+            const iconInput = document.getElementById('IconClassInput');
+            const colorSelect = document.querySelector('select[name="ColorClass"]');
+            const colorPreview = document.querySelector('.color-circle');
+
+            const colorMap = {
+                'gold': '#D4AF37',
+                'blue': '#3498db',
+                'green': '#2ecc71',
+                'red': '#e74c3c',
+                'purple': '#9b59b6',
+                'orange': '#e67e22',
+                'cyan': '#1abc9c',
+                'pink': '#fd79a8'
+            };
+
+            // تحديد الحالة الحالية للأيقونة عند التحميل
+            if (iconInput.value) {
+                const currentIcon = document.querySelector(`.icon-option[data-icon="${iconInput.value}"]`);
+                if (currentIcon) {
+                    currentIcon.classList.add('selected');
+                    // التمرير التلقائي للأيقونة المختارة
+                    currentIcon.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            // تحديث الدائرة الملونة عند التحميل
+            colorPreview.style.backgroundColor = colorMap[colorSelect.value] || '#fff';
+
+            // منطق اختيار الأيقونة
+            iconOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    iconOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    iconInput.value = this.getAttribute('data-icon');
+                });
+            });
+
+            // تحديث معاينة اللون عند التغيير
+            colorSelect.addEventListener('change', function() {
+                colorPreview.style.backgroundColor = colorMap[this.value] || '#fff';
+            });
+        });
+    </script>
+}

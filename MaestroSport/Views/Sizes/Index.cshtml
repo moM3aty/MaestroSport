@@ -1,0 +1,73 @@
+﻿@model IEnumerable<MaestroSport.Models.Size>
+@{
+    ViewData["Title"] = "إدارة المقاسات الملكية";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card-premium">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h3 style="font-weight: 900; color: var(--gold);"><i class="fas fa-ruler-combined" style="margin-left: 10px;"></i> دليل المقاسات والتسعير</h3>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">أضف المقاسات وحدد فروق الأسعار لكل مجموعة</p>
+        </div>
+        <a href="/Sizes/Create" class="btn-premium btn-gold">
+            <i class="fas fa-plus-circle"></i> إضافة مقاس جديد
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>المقاس</th>
+                    <th>مجموعة المقاسات</th>
+                    <th>السعر الإضافي</th>
+                    <th style="text-align: left;">إجراءات إدارية</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <span style="font-weight: 900; font-size: 1.2rem; color: var(--gold); background: rgba(212,175,55,0.05); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2);">
+                                @item.Name
+                            </span>
+                        </td>
+                        <td>
+                            <span style="background: rgba(255,255,255,0.03); color: #fff; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--accent); font-weight: 600;">
+                                @item.GroupName
+                            </span>
+                        </td>
+                        <td>
+                            <span style="font-weight: bold; font-size: 1.1rem; color: @(item.AdditionalPrice > 0 ? "#2ecc71" : (item.AdditionalPrice < 0 ? "#ff4757" : "var(--text-dim)"));">
+                                @(item.AdditionalPrice > 0 ? "+" : "")@item.AdditionalPrice ر.ع
+                            </span>
+                        </td>
+                        <td style="text-align: left;">
+                            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                <a href="/Sizes/Edit/@item.Id" class="btn-premium btn-outline" style="padding: 10px 15px;" title="تعديل">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="/Sizes/Delete/@item.Id" class="btn-premium btn-outline"
+                                   style="padding: 10px 15px; border-color: #ff4757; color: #ff4757;"
+                                   onclick="return confirm('هل تريد حذف هذا المقاس؟')" title="حذف">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 60px; color: var(--text-dim);">
+                            <i class="fas fa-ruler fa-3x" style="display: block; margin-bottom: 20px; opacity: 0.1;"></i>
+                            لا توجد مقاسات مضافة.. ابدأ بإضافة المقاسات (S, M, L, XL...)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

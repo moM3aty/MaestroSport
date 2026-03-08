@@ -1,0 +1,73 @@
+﻿@model MaestroSport.Models.Size
+
+@{
+    ViewData["Title"] = "إضافة مقاس جديد";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div style="max-width: 800px; margin: 0 auto;">
+    <!-- الرأس -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h2 style="font-weight: 900; color: var(--gold); letter-spacing: -1px;">إضافة مقاس ملكي</h2>
+            <p style="color: #ffffff; opacity: 0.8;">قم بتعريف مقاس جديد وتحديد سعره الإضافي</p>
+        </div>
+        <a asp-action="Index" class="btn-premium btn-outline">
+            <i class="fas fa-arrow-right" style="margin-left: 8px;"></i> العودة للقائمة
+        </a>
+    </div>
+
+    <div class="card-premium">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-4" style="font-weight: bold;"></div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
+                <!-- رمز المقاس -->
+                <div class="form-group">
+                    <label asp-for="Name" class="form-label">رمز المقاس (مثال: S, XL, 14)</label>
+                    <input asp-for="Name" class="form-control" placeholder="أدخل الرمز هنا..." />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <!-- اسم المجموعة -->
+                <div class="form-group">
+                    <label asp-for="GroupName" class="form-label">اسم المجموعة (للتنظيم)</label>
+                    <input asp-for="GroupName" class="form-control" placeholder="مثال: شبابي، أطفال، مقاسات خاصة" />
+                    <span asp-validation-for="GroupName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- السعر الإضافي بتصميم بارز -->
+            <div class="form-group" style="margin-top: 20px;">
+                <label asp-for="AdditionalPrice" class="form-label">السعر الإضافي لهذا المقاس</label>
+                <div style="position: relative;">
+                    <input asp-for="AdditionalPrice" type="number" step="0.1" class="form-control" style="padding-left: 50px; font-weight: 900; font-size: 1.2rem; color: var(--gold) !important;" value="0" />
+                    <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gold); font-weight: bold;">ر.ع</span>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid var(--accent);">
+                    <p style="font-size: 0.85rem; margin: 0; line-height: 1.6;">
+                        <i class="fas fa-info-circle" style="color: var(--gold); margin-left: 5px;"></i>
+                        <strong>ملاحظة التسعير:</strong><br>
+                        - ضع <strong>(0)</strong> للمقاسات العادية.<br>
+                        - ضع مبلغاً موجباً (مثال: <strong>1.5</strong>) لزيادة السعر في المقاسات الكبيرة.<br>
+                        - ضع مبلغاً سالباً (مثال: <strong>-1.0</strong>) لإنقاص السعر لمقاسات الأطفال.
+                    </p>
+                </div>
+                <span asp-validation-for="AdditionalPrice" class="text-danger"></span>
+            </div>
+
+            <!-- أزرار التحكم -->
+            <div style="display: flex; gap: 15px; margin-top: 40px; padding-top: 25px; border-top: 1px solid var(--accent);">
+                <button type="submit" class="btn-premium btn-gold" style="padding: 15px 50px; font-size: 1.1rem; flex: 1; justify-content: center;">
+                    <i class="fas fa-save" style="margin-left: 10px;"></i> حفظ المقاس الجديد
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
