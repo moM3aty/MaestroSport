@@ -15,16 +15,17 @@ using System.Collections.Generic;
 
 namespace MaestroSport.Controllers
 {
-    // إنشاء DTO لتمثيل البيانات المرسلة من الفرونت اند
     public class OrderSubmissionDto
     {
         public int ProductId { get; set; }
+        public string CustomerName { get; set; }
+        public string PhoneNumber { get; set; }
         public string Notes { get; set; }
         public string FabricType { get; set; }
         public decimal FabricExtraPrice { get; set; }
         public string CouponCode { get; set; }
-        public string ItemsJson { get; set; } // المصفوفة ستأتي كنص JSON
-        public IFormFile CustomImage { get; set; } // استقبال الصورة
+        public string ItemsJson { get; set; }
+        public IFormFile CustomImage { get; set; }
     }
 
     public class OrderItemDto
@@ -46,17 +47,18 @@ namespace MaestroSport.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // جلب شريط الإعلانات
             var announcement = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "AnnouncementBar");
             ViewBag.AnnouncementBar = announcement?.Value ?? "مرحباً بكم في المايسترو للرياضة";
 
-            // جلب الأقسام مع منتجاتها لتحويلها إلى JSON للفرونت اند
+            // جلب رابط صورة البانر (إضافة جديدة)
+            var promoBanner = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "PromoBannerUrl");
+            ViewBag.PromoBannerUrl = promoBanner?.Value ?? "";
+
             var categories = await _context.Categories
                 .Include(c => c.Products)
                 .OrderBy(c => c.DisplayOrder)
                 .ToListAsync();
 
-            // إعدادات JSON لتجنب الـ Reference Loops
             var jsonOptions = new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
@@ -65,7 +67,6 @@ namespace MaestroSport.Controllers
 
             ViewBag.CategoriesJson = JsonSerializer.Serialize(categories, jsonOptions);
 
-            // جلب المقاسات لتحويلها إلى JSON
             var sizes = await _context.Sizes.OrderBy(s => s.GroupName).ThenBy(s => s.Name).ToListAsync();
             ViewBag.SizesJson = JsonSerializer.Serialize(sizes, jsonOptions);
 
@@ -75,12 +76,10 @@ namespace MaestroSport.Controllers
         [HttpGet]
         public async Task<IActionResult> ValidateCoupon(string code)
         {
-            if (string.IsNullOrWhiteSpace(code))
-                return Json(new { valid = false });
+            if (string.IsNullOrWhiteSpace(code)) return Json(new { valid = false });
 
             var cleanCode = code.Trim().ToUpper();
-            var coupon = await _context.Coupons
-                .FirstOrDefaultAsync(c => c.Code == cleanCode && c.IsActive);
+            var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == cleanCode && c.IsActive);
 
             if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate.Value.Date >= DateTime.Today))
             {
@@ -99,21 +98,18 @@ namespace MaestroSport.Controllers
                 if (product == null) return Json(new { success = false, message = "الموديل غير موجود" });
 
                 var itemsList = JsonSerializer.Deserialize<List<OrderItemDto>>(request.ItemsJson);
-                if (itemsList == null || !itemsList.Any())
+                if (itemsList == null || !itemsList.Any()) 
                     return Json(new { success = false, message = "الطلب فارغ" });
 
-                // تجميع ذكي: دمج الكميات إذا تم إرسال نفس المقاس أكثر من مرة بالخطأ للحفاظ على شكل الفاتورة
                 var groupedItems = itemsList
                     .GroupBy(i => i.SizeId)
-                    .Select(g => new OrderItemDto
-                    {
-                        SizeId = g.Key,
-                        Quantity = g.Sum(i => i.Quantity)
-                    })
+                    .Select(g => new OrderItemDto { SizeId = g.Key, Quantity = g.Sum(i => i.Quantity) })
                     .ToList();
 
                 var order = new Order
                 {
+                    CustomerName = request.CustomerName,
+                    PhoneNumber = request.PhoneNumber,
                     Notes = request.Notes,
                     FabricType = request.FabricType,
                     FabricExtraPrice = request.FabricExtraPrice,
@@ -121,14 +117,13 @@ namespace MaestroSport.Controllers
                     ExpectedDeliveryDate = DateTime.Now.AddDays(14)
                 };
 
-                // معالجة رفع صورة التصميم الخاص
                 if (request.CustomImage != null && request.CustomImage.Length > 0)
                 {
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "custom_designs");
                     Directory.CreateDirectory(uploadsFolder);
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + request.CustomImage.FileName;
                     string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
+                    
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
                         await request.CustomImage.CopyToAsync(fileStream);
@@ -139,7 +134,7 @@ namespace MaestroSport.Controllers
                 decimal totalAmount = 0;
                 int totalQty = 0;
 
-                foreach (var item in groupedItems) // استخدام القائمة المجمعة بدلاً من القائمة العادية
+                foreach (var item in groupedItems)
                 {
                     var size = await _context.Sizes.FindAsync(item.SizeId);
                     if (size == null) continue;
@@ -157,16 +152,13 @@ namespace MaestroSport.Controllers
                     });
                 }
 
-                // إضافة سعر القماش لكل قطعة
                 totalAmount += (request.FabricExtraPrice * totalQty);
 
-                // رسوم التصميم
                 if (product.IsCustomDesign && totalQty > 0 && totalQty <= 10)
                 {
                     totalAmount += (2 * totalQty);
                 }
 
-                // تطبيق الكوبون
                 if (!string.IsNullOrEmpty(request.CouponCode))
                 {
                     var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == request.CouponCode && c.IsActive);
@@ -181,18 +173,17 @@ namespace MaestroSport.Controllers
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, orderId = order.Id, totalPrice = order.TotalAmount, deliveryDate = order.ExpectedDeliveryDate.ToString("yyyy/MM/dd") });
+                return Json(new { 
+                    success = true, 
+                    orderId = order.Id, 
+                    totalPrice = order.TotalAmount, 
+                    deliveryDate = order.ExpectedDeliveryDate.ToString("yyyy/MM/dd") 
+                });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "حدث خطأ داخلي: " + ex.Message });
             }
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

@@ -17,7 +17,7 @@ namespace MaestroSport.Controllers
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _webHostEnvironment; // إضافة بيئة الاستضافة لحفظ الملفات
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public ProductsController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
@@ -25,14 +25,12 @@ namespace MaestroSport.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        // عرض كل الموديلات مع جلب اسم القسم
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.Products.Include(p => p.Category);
             return View(await applicationDbContext.ToListAsync());
         }
 
-        // إضافة موديل جديد
         public IActionResult Create()
         {
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
@@ -41,30 +39,28 @@ namespace MaestroSport.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,BasePrice,IsCustomDesign,CategoryId,ImageFile")] Product product)
+        public async Task<IActionResult> Create([Bind("Id,Name,BasePrice,IsCustomDesign,CategoryId")] Product product, IFormFile? ImageFile)
         {
-            ModelState.Remove("Category");
-            ModelState.Remove("ImageUrl");
-            ModelState.Remove("OrderItems");
+            ModelState.Remove("ImageFile"); // منع خطأ الـ Validation
+
             if (ModelState.IsValid)
             {
-                // معالجة رفع الصورة الجديدة
-                if (product.ImageFile != null)
+                if (ImageFile != null && ImageFile.Length > 0)
                 {
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
-                    Directory.CreateDirectory(uploadsFolder); // التأكد من وجود المجلد
-                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + product.ImageFile.FileName;
+                    Directory.CreateDirectory(uploadsFolder);
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + ImageFile.FileName;
                     string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
-                        await product.ImageFile.CopyToAsync(fileStream);
+                        await ImageFile.CopyToAsync(fileStream);
                     }
                     product.ImageUrl = "images/" + uniqueFileName;
                 }
                 else
                 {
-                    product.ImageUrl = "images/logo.png"; // صورة افتراضية في حال لم يرفع صورة
+                    product.ImageUrl = "images/logo.png";
                 }
 
                 _context.Add(product);
@@ -75,7 +71,6 @@ namespace MaestroSport.Controllers
             return View(product);
         }
 
-        // تعديل موديل
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -89,23 +84,46 @@ namespace MaestroSport.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,BasePrice,ImageUrl,IsCustomDesign,CategoryId")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,BasePrice,ImageUrl,IsCustomDesign,CategoryId")] Product product, IFormFile? ImageFile)
         {
             if (id != product.Id) return NotFound();
-            ModelState.Remove("Category");
-            ModelState.Remove("ImageUrl");
-            ModelState.Remove("OrderItems");
+
+            ModelState.Remove("ImageFile"); // لحل مشكلة عدم الحفظ
+
             if (ModelState.IsValid)
             {
-                _context.Update(product);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    if (ImageFile != null && ImageFile.Length > 0)
+                    {
+                        string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+                        Directory.CreateDirectory(uploadsFolder);
+                        string uniqueFileName = Guid.NewGuid().ToString() + "_" + ImageFile.FileName;
+                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await ImageFile.CopyToAsync(fileStream);
+                        }
+                        // تحديث مسار الصورة بالصورة الجديدة
+                        product.ImageUrl = "images/" + uniqueFileName;
+                    }
+                    // إذا لم يتم رفع صورة، سيحتفظ بـ ImageUrl القادم من الحقل المخفي في الـ View
+
+                    _context.Update(product);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ProductExists(product.Id)) return NotFound();
+                    else throw;
+                }
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
             return View(product);
         }
 
-        // حذف موديل
         public async Task<IActionResult> Delete(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -115,6 +133,11 @@ namespace MaestroSport.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        private bool ProductExists(int id)
+        {
+            return _context.Products.Any(e => e.Id == id);
         }
     }
 }
