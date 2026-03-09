@@ -1,5 +1,8 @@
 wwwroot\css\style.css
 wwwroot\favicon.ico
+wwwroot\images\banners\95ff2988-53c7-49f2-bf71-2e365826c11c_4.png
+wwwroot\images\banners\ce6a7eca-b1ad-4727-8f62-a5244874365c_3.png
+wwwroot\images\custom_designs\bca657d1-aad3-4f89-bca9-705f3910c333_2.jpg
 wwwroot\images\logo.png
 wwwroot\images\p1.webp
 wwwroot\images\p2.webp

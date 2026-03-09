@@ -365,6 +365,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="/Fabrics" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Fabrics" ? "active" : "")">
+                        <i class="fas fa-shirt"></i> القماش
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="/Coupons" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Coupons" ? "active" : "")">
                         <i class="fas fa-ticket-alt"></i> الكوبونات
                     </a>
@@ -373,7 +378,7 @@
                     <a href="/Settings" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Settings" ? "active" : "")">
                         <i class="fas fa-cogs"></i> الإعدادات
                     </a>
-                </li>
+                </li>   
             </ul>
             <div class="p-4">
                 <a href="/Account/Logout" class="nav-link text-danger" style="color: #ff4757;">

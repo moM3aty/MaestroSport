@@ -1,0 +1,21 @@
+﻿@model MaestroSport.Models.Fabric
+@{
+    ViewData["Title"] = "تعديل قماش";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div style="max-width: 600px; margin: 0 auto;" class="card-premium">
+    <h3 style="color: var(--gold); margin-bottom: 20px;">تعديل بيانات القماش</h3>
+    <form asp-action="Edit">
+        <input type="hidden" asp-for="Id" />
+        <div class="form-group mb-3">
+            <label class="form-label">اسم القماش</label>
+            <input asp-for="Name" class="form-control" required />
+        </div>
+        <div class="form-group mb-4">
+            <label class="form-label">السعر الإضافي</label>
+            <input asp-for="AdditionalPrice" type="number" step="0.5" class="form-control" />
+        </div>
+        <button type="submit" class="btn-premium btn-gold w-100 justify-content-center">تحديث</button>
+    </form>
+</div>

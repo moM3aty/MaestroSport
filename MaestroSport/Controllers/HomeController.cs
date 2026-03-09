@@ -50,25 +50,19 @@ namespace MaestroSport.Controllers
             var announcement = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "AnnouncementBar");
             ViewBag.AnnouncementBar = announcement?.Value ?? "مرحباً بكم في المايسترو للرياضة";
 
-            // جلب رابط صورة البانر (إضافة جديدة)
             var promoBanner = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "PromoBannerUrl");
             ViewBag.PromoBannerUrl = promoBanner?.Value ?? "";
 
-            var categories = await _context.Categories
-                .Include(c => c.Products)
-                .OrderBy(c => c.DisplayOrder)
-                .ToListAsync();
+            var categories = await _context.Categories.Include(c => c.Products).OrderBy(c => c.DisplayOrder).ToListAsync();
+            var sizes = await _context.Sizes.OrderBy(s => s.GroupName).ThenBy(s => s.Name).ToListAsync();
 
-            var jsonOptions = new JsonSerializerOptions
-            {
-                ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                PropertyNamingPolicy = null
-            };
+            var fabrics = await _context.Fabrics.OrderBy(f => f.AdditionalPrice).ToListAsync();
+
+            var jsonOptions = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.IgnoreCycles, PropertyNamingPolicy = null };
 
             ViewBag.CategoriesJson = JsonSerializer.Serialize(categories, jsonOptions);
-
-            var sizes = await _context.Sizes.OrderBy(s => s.GroupName).ThenBy(s => s.Name).ToListAsync();
             ViewBag.SizesJson = JsonSerializer.Serialize(sizes, jsonOptions);
+            ViewBag.FabricsJson = JsonSerializer.Serialize(fabrics, jsonOptions);
 
             return View();
         }
@@ -76,17 +70,30 @@ namespace MaestroSport.Controllers
         [HttpGet]
         public async Task<IActionResult> ValidateCoupon(string code)
         {
-            if (string.IsNullOrWhiteSpace(code)) return Json(new { valid = false });
-
-            var cleanCode = code.Trim().ToUpper();
-            var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == cleanCode && c.IsActive);
-
-            if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate.Value.Date >= DateTime.Today))
+            try
             {
-                return Json(new { valid = true, discount = coupon.DiscountAmount });
-            }
+                if (string.IsNullOrWhiteSpace(code))
+                    return Json(new { valid = false });
 
-            return Json(new { valid = false });
+                var cleanCode = code.Trim().ToUpper();
+
+                // تم تبسيط الاستعلام لتجنب مشاكل الترجمة في SQL
+                var coupon = await _context.Coupons
+                    .FirstOrDefaultAsync(c => c.Code == cleanCode && c.IsActive);
+
+                // استخدام DateTime.Now بدلاً من .Value.Date لمنع الأخطاء
+                if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate >= DateTime.Now))
+                {
+                    return Json(new { valid = true, discount = coupon.DiscountAmount });
+                }
+
+                return Json(new { valid = false });
+            }
+            catch (Exception)
+            {
+                // حماية الكنترولر من التوقف في حال وجود خطأ في قاعدة البيانات
+                return Json(new { valid = false });
+            }
         }
 
         [HttpPost]
@@ -98,7 +105,7 @@ namespace MaestroSport.Controllers
                 if (product == null) return Json(new { success = false, message = "الموديل غير موجود" });
 
                 var itemsList = JsonSerializer.Deserialize<List<OrderItemDto>>(request.ItemsJson);
-                if (itemsList == null || !itemsList.Any()) 
+                if (itemsList == null || !itemsList.Any())
                     return Json(new { success = false, message = "الطلب فارغ" });
 
                 var groupedItems = itemsList
@@ -123,7 +130,7 @@ namespace MaestroSport.Controllers
                     Directory.CreateDirectory(uploadsFolder);
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + request.CustomImage.FileName;
                     string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                    
+
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
                         await request.CustomImage.CopyToAsync(fileStream);
@@ -148,7 +155,10 @@ namespace MaestroSport.Controllers
                         ProductId = product.Id,
                         SizeId = size.Id,
                         Quantity = item.Quantity,
-                        UnitPrice = unitPrice
+                        UnitPrice = unitPrice,
+                        // ------------- الحل الأساسي لمشكلة الداتا بيز -------------
+                        // قاعدة البيانات ترفض القيم الفارغة في هذا العمود، لذا نمرر لها الصورة أو نص فارغ
+                        CustomDesignImageUrl = order.CustomDesignImageUrl ?? ""
                     });
                 }
 
@@ -162,7 +172,7 @@ namespace MaestroSport.Controllers
                 if (!string.IsNullOrEmpty(request.CouponCode))
                 {
                     var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == request.CouponCode && c.IsActive);
-                    if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate.Value.Date >= DateTime.Today))
+                    if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate >= DateTime.Now))
                     {
                         totalAmount -= coupon.DiscountAmount;
                     }
@@ -173,15 +183,17 @@ namespace MaestroSport.Controllers
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
-                return Json(new { 
-                    success = true, 
-                    orderId = order.Id, 
-                    totalPrice = order.TotalAmount, 
-                    deliveryDate = order.ExpectedDeliveryDate.ToString("yyyy/MM/dd") 
+                return Json(new
+                {
+                    success = true,
+                    orderId = order.Id,
+                    totalPrice = order.TotalAmount,
+                    deliveryDate = order.ExpectedDeliveryDate.ToString("yyyy/MM/dd")
                 });
             }
             catch (Exception ex)
             {
+                // إرجاع رسالة الخطأ لتظهر في الشاشة لمعرفة السبب إن تكرر
                 return Json(new { success = false, message = "حدث خطأ داخلي: " + ex.Message });
             }
         }

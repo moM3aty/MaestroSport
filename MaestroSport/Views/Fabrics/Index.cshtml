@@ -1,0 +1,39 @@
+﻿@model IEnumerable<MaestroSport.Models.Fabric>
+@{
+    ViewData["Title"] = "إدارة أنواع الأقمشة";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card-premium">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h3 style="font-weight: 900; color: var(--gold);"><i class="fas fa-layer-group"></i> أنواع الأقمشة</h3>
+        <a href="/Fabrics/Create" class="btn-premium btn-gold"><i class="fas fa-plus"></i> إضافة قماش جديد</a>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>اسم القماش</th>
+                    <th>السعر الإضافي (ر.ع)</th>
+                    <th style="text-align: left;">خيارات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="font-weight: bold; font-size: 1.1rem;">@item.Name</td>
+                        <td style="color: @(item.AdditionalPrice > 0 ? "#2ecc71" : "var(--text-dim)"); font-weight: bold;">
+                            @(item.AdditionalPrice > 0 ? "+" : "")@item.AdditionalPrice
+                        </td>
+                        <td style="text-align: left;">
+                            <a href="/Fabrics/Edit/@item.Id" class="btn-premium btn-outline" style="padding: 8px;"><i class="fas fa-edit"></i></a>
+                            <a href="/Fabrics/Delete/@item.Id" class="btn-premium btn-outline" style="padding: 8px; border-color: #ff4757; color: #ff4757;" onclick="return confirm('تأكيد الحذف؟')"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -18,6 +18,7 @@ namespace MaestroSport.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<SiteSetting> SiteSettings { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<Fabric> Fabrics { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

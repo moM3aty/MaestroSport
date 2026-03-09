@@ -41,7 +41,10 @@ namespace MaestroSport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,BasePrice,IsCustomDesign,CategoryId")] Product product, IFormFile? ImageFile)
         {
-            ModelState.Remove("ImageFile"); // منع خطأ الـ Validation
+            ModelState.Remove("ImageFile"); 
+            ModelState.Remove("Category"); 
+            ModelState.Remove("ImageUrl"); 
+            ModelState.Remove("OrderItems"); 
 
             if (ModelState.IsValid)
             {
@@ -88,8 +91,10 @@ namespace MaestroSport.Controllers
         {
             if (id != product.Id) return NotFound();
 
-            ModelState.Remove("ImageFile"); // لحل مشكلة عدم الحفظ
-
+            ModelState.Remove("ImageFile");
+            ModelState.Remove("Category");
+            ModelState.Remove("ImageUrl");
+            ModelState.Remove("OrderItems");
             if (ModelState.IsValid)
             {
                 try
