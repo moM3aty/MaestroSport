@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MaestroSport.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Worker")]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -21,24 +21,33 @@ namespace MaestroSport.Controllers
         public async Task<IActionResult> Index()
         {
             var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
 
-            // حساب السعة الإنتاجية (عدد القطع المطلوبة اليوم)
+            // 1. حساب السعة الإنتاجية لليوم (عدد القطع المطلوبة اليوم)
             var todayItemsCount = await _context.OrderItems
-                .Where(oi => oi.Order.CreatedAt.Date == today)
+                .Where(oi => oi.Order.CreatedAt >= today && oi.Order.CreatedAt < tomorrow)
                 .SumAsync(oi => (int?)oi.Quantity) ?? 0;
 
-            ViewBag.TodayItemsCount = todayItemsCount;
-            ViewBag.CapacityLeft = Math.Max(0, 15 - todayItemsCount);
+            // قراءة السعة القصوى من الإعدادات (أو استخدام 15 كافتراضي)
+            int dailyCapacity = 15;
+            var capacitySetting = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "DailyCapacity");
+            if (capacitySetting != null && int.TryParse(capacitySetting.Value, out int cap))
+            {
+                dailyCapacity = cap;
+            }
 
-            // إحصائيات لوحة التحكم
+            ViewBag.TodayItemsCount = todayItemsCount;
+            // حساب المتبقي من السعة والتأكد من أنه لا يقل عن صفر
+            ViewBag.CapacityLeft = Math.Max(0, dailyCapacity - todayItemsCount);
+            ViewBag.DailyCapacity = dailyCapacity; // تمرير السعة القصوى للـ View لعرضها مثلاً: المتبقي 5 / 20
+
+            // 2. إحصائيات لوحة التحكم العامة
             ViewBag.PendingOrders = await _context.Orders.CountAsync(o => o.Status == "قيد المراجعة");
             ViewBag.TotalProducts = await _context.Products.CountAsync();
             ViewBag.TotalCategories = await _context.Categories.CountAsync();
-
-            // إضافة إحصائية المقاسات المفقودة
             ViewBag.TotalSizes = await _context.Sizes.CountAsync();
 
-            // أحدث 5 طلبات
+            // 3. أحدث 5 طلبات لعرضها في الجدول
             var recentOrders = await _context.Orders
                 .OrderByDescending(o => o.CreatedAt)
                 .Take(5)

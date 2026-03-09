@@ -32,9 +32,19 @@ namespace MaestroSport.Controllers
                 if (result.Succeeded)
                 {
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    {
                         return Redirect(returnUrl);
+                    }
                     else
+                    {
+                        // التأكد من توجيه العامل لصفحة الطلبات والأدمن لصفحة الإحصائيات
+                        var user = await _signInManager.UserManager.FindByNameAsync(username);
+                        if (await _signInManager.UserManager.IsInRoleAsync(user, "Worker"))
+                        {
+                            return RedirectToAction("Index", "Orders");
+                        }
                         return RedirectToAction("Index", "Admin");
+                    }
                 }
 
                 ModelState.AddModelError(string.Empty, "اسم المستخدم أو كلمة المرور غير صحيحة");

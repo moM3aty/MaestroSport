@@ -77,11 +77,9 @@ namespace MaestroSport.Controllers
 
                 var cleanCode = code.Trim().ToUpper();
 
-                // تم تبسيط الاستعلام لتجنب مشاكل الترجمة في SQL
                 var coupon = await _context.Coupons
                     .FirstOrDefaultAsync(c => c.Code == cleanCode && c.IsActive);
 
-                // استخدام DateTime.Now بدلاً من .Value.Date لمنع الأخطاء
                 if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate >= DateTime.Now))
                 {
                     return Json(new { valid = true, discount = coupon.DiscountAmount });
@@ -91,7 +89,6 @@ namespace MaestroSport.Controllers
             }
             catch (Exception)
             {
-                // حماية الكنترولر من التوقف في حال وجود خطأ في قاعدة البيانات
                 return Json(new { valid = false });
             }
         }
@@ -121,7 +118,8 @@ namespace MaestroSport.Controllers
                     FabricType = request.FabricType,
                     FabricExtraPrice = request.FabricExtraPrice,
                     CouponCode = request.CouponCode,
-                    ExpectedDeliveryDate = DateTime.Now.AddDays(14)
+                    // التعديل هنا: إضافة يومين بدلاً من 14 يوم
+                    ExpectedDeliveryDate = DateTime.Now.AddDays(2)
                 };
 
                 if (request.CustomImage != null && request.CustomImage.Length > 0)
@@ -156,8 +154,6 @@ namespace MaestroSport.Controllers
                         SizeId = size.Id,
                         Quantity = item.Quantity,
                         UnitPrice = unitPrice,
-                        // ------------- الحل الأساسي لمشكلة الداتا بيز -------------
-                        // قاعدة البيانات ترفض القيم الفارغة في هذا العمود، لذا نمرر لها الصورة أو نص فارغ
                         CustomDesignImageUrl = order.CustomDesignImageUrl ?? ""
                     });
                 }
@@ -193,7 +189,6 @@ namespace MaestroSport.Controllers
             }
             catch (Exception ex)
             {
-                // إرجاع رسالة الخطأ لتظهر في الشاشة لمعرفة السبب إن تكرر
                 return Json(new { success = false, message = "حدث خطأ داخلي: " + ex.Message });
             }
         }

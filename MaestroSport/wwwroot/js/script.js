@@ -48,7 +48,9 @@ function loadCategory(catId) {
         cat.Products.forEach(item => {
             list.innerHTML += `
                 <div class="product-item">
-                    <div class="product-img"><img src="/${item.ImageUrl}" onerror="this.src='https://placehold.co/400x500/111/D4AF37?text=No+Image'"></div>
+                    <div class="product-
+
+                    "><img src="/${item.ImageUrl}" onerror="this.src='https://placehold.co/400x500/111/D4AF37?text=No+Image'"></div>
                     <div class="product-info">
                         <h3 style="color: #ffffff;">${item.Name} ${item.IsCustomDesign ? '<br><small style="color:#D4AF37; font-size:0.8rem;">(تصميم خاص)</small>' : ''}</h3>
                         <p style="color:#D4AF37; font-weight:900; font-size:1.5rem; margin-bottom:15px;">${item.BasePrice} ريال</p>

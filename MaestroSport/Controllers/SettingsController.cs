@@ -96,5 +96,24 @@ namespace MaestroSport.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCapacity(int dailyCapacity)
+        {
+            var setting = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "DailyCapacity");
+            if (setting != null)
+            {
+                setting.Value = dailyCapacity.ToString();
+                _context.Update(setting);
+            }
+            else
+            {
+                _context.SiteSettings.Add(new SiteSetting { Key = "DailyCapacity", Value = dailyCapacity.ToString() });
+            }
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "تم تحديث السعة الإنتاجية اليومية بنجاح";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

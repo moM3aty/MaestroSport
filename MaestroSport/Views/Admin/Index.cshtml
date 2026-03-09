@@ -8,7 +8,8 @@
     <div class="stat-card">
         <div>
             <p class="stat-label">سعة اليوم</p>
-            <p class="stat-val">@ViewBag.CapacityLeft <span style="font-size: 1rem; color: var(--text-dim); font-weight: normal;">/ 15</span></p>
+            <!-- تم التعديل هنا لتقرأ السعة الكلية من الكنترولر بدلاً من الرقم الثابت -->
+            <p class="stat-val">@ViewBag.CapacityLeft <span style="font-size: 1rem; color: var(--text-dim); font-weight: normal;">/ @ViewBag.DailyCapacity</span></p>
         </div>
         <i class="fas fa-bolt fa-2x" style="color: #f1c40f;"></i>
     </div>
@@ -26,7 +27,7 @@
         </div>
         <i class="fas fa-tshirt fa-2x" style="color: #3498db;"></i>
     </div>
-    <!-- إضافة كارت المقاسات المفقود -->
+    <!-- إضافة كارت المقاسات -->
     <div class="stat-card" style="border-right-color: var(--gold);">
         <div>
             <p class="stat-label">أنواع المقاسات</p>
@@ -68,7 +69,16 @@
                             </span>
                         </td>
                         <td style="text-align: left;">
-                            <a href="/Orders/Details/@item.Id" class="btn-premium btn-gold" style="padding: 8px 15px;"><i class="fas fa-eye"></i></a>
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                <a href="/Orders/Details/@item.Id" class="btn-premium btn-gold" style="padding: 8px 15px;"><i class="fas fa-eye"></i></a>
+
+                                <!-- زر الحذف الجديد (يعمل فورم صغير لإرسال طلب الحذف) -->
+                                <form asp-controller="Orders" asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب نهائياً وإلغائه؟');">
+                                    <button type="submit" class="btn-premium btn-outline" style="padding: 8px 15px; border-color: #ff4757; color: #ff4757;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }

@@ -11,10 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="~/images/logo.png" rel="icon" type="image/x-icon" />
-
     <style>
         /* ==========================================================================
-                   ULTRA PREMIUM DESIGN SYSTEM
+                   ULTRA PREMIUM DESIGN SYSTEM (Wizard Flow)
                    ========================================================================== */
         :root {
             --gold: #D4AF37;
@@ -79,6 +78,7 @@
             display: none !important;
         }
 
+        /* Header & Navigation */
         .header {
             position: fixed;
             top: 0;
@@ -170,6 +170,7 @@
 
         }
 
+        /* Announcement & Banners */
         .announcement-wrapper {
             background: var(--bg-surface);
             border-bottom: 1px solid var(--border-subtle);
@@ -240,9 +241,9 @@
         }
 
         .hero-banner-img {
-           margin:auto;
             height: 100%;
             display: block;
+            margin:auto;
         }
 
         .entry-gate {
@@ -355,6 +356,7 @@
             gap: 8px;
         }
 
+        /* Grids & Cards */
         .grid-layout {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -579,7 +581,7 @@
             font-size: 0.85rem;
         }
 
-        /* --- Modal --- */
+        /* --- Modal & Wizard Flow --- */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -664,6 +666,16 @@
             cursor: pointer;
             font-size: 1.2rem;
         }
+
+        /* Step Views Animation */
+        .step-view {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+            .step-view.active {
+                display: block;
+            }
 
         .form-section {
             margin-bottom: 25px;
@@ -864,6 +876,62 @@
                 cursor: pointer;
             }
 
+        /* Step 2 Delivery Card */
+        .delivery-mega-card {
+            background: rgba(46, 204, 113, 0.08);
+            border: 2px dashed rgba(46, 204, 113, 0.4);
+            border-radius: var(--border-radius-md);
+            padding: 25px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .delivery-mega-icon {
+            font-size: 2.5rem;
+            color: #2ecc71;
+            margin-bottom: 10px;
+        }
+
+        .delivery-mega-text {
+            display: block;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .delivery-mega-date {
+            display: block;
+            color: #2ecc71;
+            font-weight: 900;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+        }
+
+        .summary-card {
+            background: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+            .summary-row.total {
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px dashed rgba(255,255,255,0.1);
+                font-size: 1.2rem;
+                font-weight: 900;
+                color: var(--gold);
+            }
+
         .modal-footer-sticky {
             position: sticky;
             bottom: 0;
@@ -887,7 +955,7 @@
             line-height: 1;
         }
 
-        .btn-checkout {
+        .btn-wizard {
             width: 100%;
             background: var(--gold-gradient);
             color: var(--bg-base);
@@ -904,9 +972,32 @@
             transition: transform 0.2s;
         }
 
-            .btn-checkout:active {
+            .btn-wizard:active {
                 transform: scale(0.97);
             }
+
+        .btn-wizard-outline {
+            width: 100%;
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+            padding: 15px;
+            border-radius: var(--border-radius-md);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .btn-wizard-outline:hover {
+                border-color: var(--text-primary);
+            }
+
+        .step-2-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
         .swal2-popup-custom {
             background: var(--bg-surface-elevated) !important;
@@ -918,7 +1009,6 @@
 </head>
 <body>
 
-    <!-- Header -->
     <header class="header">
         <a href="#" class="header-brand" onclick="toggleView('home')">
             <img src="~/images/logo.png" alt="المايسترو" class="header-logo" onerror="this.src='https://placehold.co/100/111/D4AF37?text=M'">
@@ -929,7 +1019,6 @@
     </header>
 
     <main>
-        <!-- Announcement Bar -->
         <div class="announcement-wrapper">
             <div class="announcement-bar">
                 <i class="fas fa-bolt announcement-icon"></i>
@@ -937,19 +1026,16 @@
             </div>
         </div>
 
-        <!-- SCREEN 1: THE HOME -->
         <section id="home-screen" class="app-screen active">
             <div class="container">
                 <div class="hero-banner-container" id="main-promo-banner" style="display: none;">
                     <img id="banner-img" src="" alt="عروض المايسترو" class="hero-banner-img">
                 </div>
-
                 <div class="entry-gate" onclick="toggleView('categories')">
                     <div class="entry-gate-icon"><i class="fas fa-cut"></i></div>
                     <h2>تفصيل وخياطة الملابس الرياضية</h2>
                     <p>اضغط هنا لبدء الطلب واختيار الأقسام المتاحة</p>
                 </div>
-
                 <div class="insta-banner-card">
                     <div class="insta-banner-inner">
                         <i class="fab fa-instagram insta-icon-large"></i>
@@ -963,7 +1049,6 @@
             </div>
         </section>
 
-        <!-- SCREEN 2: CATEGORIES -->
         <section id="categories-screen" class="app-screen">
             <div class="container">
                 <div class="screen-header">
@@ -974,7 +1059,6 @@
             </div>
         </section>
 
-        <!-- SCREEN 3: PRODUCTS -->
         <section id="shop-screen" class="app-screen">
             <div class="container">
                 <div class="screen-header">
@@ -985,7 +1069,6 @@
             </div>
         </section>
 
-        <!-- Footer -->
         <footer class="premium-footer">
             <div class="container">
                 <div class="footer-grid">
@@ -1000,7 +1083,7 @@
             </div>
         </footer>
 
-        <!-- Order Modal -->
+        <!-- WIZARD ORDER MODAL -->
         <div id="order-modal" class="modal-overlay">
             <div class="modal-content">
                 <div class="modal-header-sticky">
@@ -1013,80 +1096,129 @@
 
                 <div class="order-form-body">
 
-                    <div id="custom-design-alert" class="hidden" style="background: rgba(212,175,55,0.08); border: 1px dashed var(--gold); padding: 15px; border-radius: var(--border-radius-md); margin-bottom: 25px; display: flex; gap: 12px; align-items: center;">
-                        <i class="fas fa-gem text-gold fa-2x"></i>
-                        <div>
-                            <strong class="text-gold" style="font-size: 1.1rem;">تصميم خاص</strong><br>
-                            <span style="color:var(--text-primary); font-size:0.9rem;">يضاف 2 ر.ع لرسوم التصميم للقطعة.</span><br>
-                            <span style="color:var(--text-secondary); font-size:0.8rem;">(مجانًا للطلبات من 11 قطعة فأكثر)</span>
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <div class="section-label"><i class="fas fa-address-card"></i> بيانات الاستلام</div>
-                        <input type="text" id="customer-name" class="input-modern" placeholder="الاسم الكريم" style="margin-bottom: 12px;">
-                        <input type="tel" id="customer-phone" class="input-modern" placeholder="رقم الهاتف للتواصل (مثال: 90000000)">
-                    </div>
-
-                    <div class="form-section">
-                        <div class="section-label"><i class="fas fa-ruler-combined"></i> تحديد المقاسات</div>
-                        <div id="size-options-grid" class="size-selector-grid"></div>
-
-                        <div class="add-action-row">
-                            <div class="qty-control-modern">
-                                <button type="button" class="qty-btn-modern" onclick="changeQty(-1)"><i class="fas fa-minus"></i></button>
-                                <input type="number" id="selected-qty" class="qty-input-modern" value="1" readonly>
-                                <button type="button" class="qty-btn-modern" onclick="changeQty(1)"><i class="fas fa-plus"></i></button>
+                    <!-- =====================================
+                         STEP 1: DETAILS & CART
+                         ===================================== -->
+                    <div id="step-1-details" class="step-view active">
+                        <div id="custom-design-alert" class="hidden" style="background: rgba(212,175,55,0.08); border: 1px dashed var(--gold); padding: 15px; border-radius: var(--border-radius-md); margin-bottom: 25px; display: flex; gap: 12px; align-items: center;">
+                            <i class="fas fa-gem text-gold fa-2x"></i>
+                            <div>
+                                <strong class="text-gold" style="font-size: 1.1rem;">تصميم خاص</strong><br>
+                                <span style="color:var(--text-primary); font-size:0.9rem;">يضاف 2 ر.ع لرسوم التصميم للقطعة.</span><br>
+                                <span style="color:var(--text-secondary); font-size:0.8rem;">(مجانًا للطلبات من 11 قطعة فأكثر)</span>
                             </div>
-                            <button type="button" class="btn-add-cart" onclick="addSizeToSelection()">
-                                إضافة <i class="fas fa-cart-plus"></i>
-                            </button>
                         </div>
 
-                        <div id="selected-sizes-list" class="cart-container hidden"></div>
-                    </div>
+                        <div class="form-section">
+                            <div class="section-label"><i class="fas fa-address-card"></i> بيانات الاستلام</div>
+                            <input type="text" id="customer-name" class="input-modern" placeholder="الاسم الكريم" style="margin-bottom: 12px;">
+                            <input type="tel" id="customer-phone" class="input-modern" placeholder="رقم الهاتف للتواصل (مثال: 90000000)">
+                        </div>
 
-                    <div id="custom-image-section" class="form-section hidden">
-                        <div class="section-label"><i class="fas fa-cloud-upload-alt"></i> إرفاق التصميم أو الشعار (اختياري)</div>
-                        <div class="file-upload-wrapper">
-                            <input type="file" id="custom-image-input" accept="image/*" class="file-upload-input">
+                        <div class="form-section">
+                            <div class="section-label"><i class="fas fa-ruler-combined"></i> تحديد المقاسات</div>
+                            <div id="size-options-grid" class="size-selector-grid"></div>
+
+                            <div class="add-action-row">
+                                <div class="qty-control-modern">
+                                    <button type="button" class="qty-btn-modern" onclick="changeQty(-1)"><i class="fas fa-minus"></i></button>
+                                    <input type="number" id="selected-qty" class="qty-input-modern" value="1" readonly>
+                                    <button type="button" class="qty-btn-modern" onclick="changeQty(1)"><i class="fas fa-plus"></i></button>
+                                </div>
+                                <button type="button" class="btn-add-cart" onclick="addSizeToSelection()">
+                                    إضافة <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+
+                            <div id="selected-sizes-list" class="cart-container hidden"></div>
+                        </div>
+
+                        <div id="custom-image-section" class="form-section hidden">
+                            <div class="section-label"><i class="fas fa-cloud-upload-alt"></i> إرفاق التصميم أو الشعار (اختياري)</div>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="custom-image-input" accept="image/*" class="file-upload-input">
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="section-label"><i class="fas fa-layer-group"></i> اختيار القماش</div>
+                            <select id="fabric-select" class="input-modern" onchange="calculateLiveTotal()">
+                            </select>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="section-label"><i class="fas fa-pen-nib"></i> تفاصيل إضافية</div>
+                            <textarea id="order-notes" class="input-modern" rows="3" placeholder="اكتب الأسماء، الأرقام المطلوبة على الظهر، أو أي ملاحظات..."></textarea>
+                        </div>
+
+                        <div class="form-section" style="display: flex; gap: 10px;">
+                            <input type="text" id="coupon-input" class="input-modern" placeholder="لديك كود خصم؟">
+                            <button type="button" onclick="applyCouponLogic()" style="background:var(--bg-surface-elevated); border:1px solid var(--gold); color:var(--gold); border-radius:var(--border-radius-md); padding:0 25px; font-weight:900; cursor:pointer; transition: 0.3s;">تطبيق</button>
                         </div>
                     </div>
 
-                    <div class="form-section">
-                        <div class="section-label"><i class="fas fa-layer-group"></i> اختيار القماش</div>
-                        <!-- تم إزالة الأنواع الثابتة وستتم تعبئتها ديناميكياً من لوحة التحكم -->
-                        <select id="fabric-select" class="input-modern" onchange="calculateLiveTotal()">
-                            <!-- Dynamic Content -->
-                        </select>
-                    </div>
+                    <!-- =====================================
+                         STEP 2: DELIVERY DATE & CONFIRMATION
+                         ===================================== -->
+                    <div id="step-2-confirmation" class="step-view">
 
-                    <div class="form-section">
-                        <div class="section-label"><i class="fas fa-pen-nib"></i> تفاصيل إضافية</div>
-                        <textarea id="order-notes" class="input-modern" rows="3" placeholder="اكتب الأسماء، الأرقام المطلوبة على الظهر، أو أي ملاحظات لتفصيل طلبك بدقة..."></textarea>
-                    </div>
+                        <div class="delivery-mega-card">
+                            <i class="fas fa-calendar-check delivery-mega-icon"></i>
+                            <span class="delivery-mega-text">موعد تسليم طلبك التقريبي</span>
+                            <span class="delivery-mega-date" id="expected-date-display">---</span>
+                        </div>
 
-                    <div class="form-section" style="display: flex; gap: 10px;">
-                        <input type="text" id="coupon-input" class="input-modern" placeholder="لديك كود خصم؟">
-                        <button type="button" onclick="applyCouponLogic()" style="background:var(--bg-surface-elevated); border:1px solid var(--gold); color:var(--gold); border-radius:var(--border-radius-md); padding:0 25px; font-weight:900; cursor:pointer; transition: 0.3s;">تطبيق</button>
+                        <div class="summary-card">
+                            <h4 style="color:var(--gold); margin-bottom:15px; border-bottom:1px solid var(--border-subtle); padding-bottom:10px;">مراجعة الطلب</h4>
+                            <div class="summary-row">
+                                <span style="color:var(--text-secondary);">الموديل:</span>
+                                <span id="summary-model-name" style="font-weight:bold;">---</span>
+                            </div>
+                            <div class="summary-row">
+                                <span style="color:var(--text-secondary);">إجمالي القطع:</span>
+                                <span id="summary-total-qty" style="font-weight:bold;">0 قطعة</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>الإجمالي النهائي:</span>
+                                <span><span id="summary-total-price">0</span> ر.ع</span>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(212,175,55,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; color: var(--text-secondary); text-align: center;">
+                            <i class="fas fa-info-circle text-gold"></i> سيتم تحويل طلبك للإدارة، وسنقوم بالتواصل معك لتأكيد الدفع وبدء التفصيل.
+                        </div>
+
                     </div>
                 </div>
 
+                <!-- STICKY FOOTER (Dynamic Buttons) -->
                 <div class="modal-footer-sticky">
-                    <div class="price-summary">
-                        <div style="display:flex; flex-direction:column;">
-                            <span class="price-summary-label" style="color:var(--text-primary); font-weight:800; font-size:1.1rem;">الإجمالي النهائي:</span>
-                            <!-- مساحة مخصصة لعرض التوفير إذا تم تطبيق الكوبون -->
-                            <span id="discount-display" class="hidden" style="color: #2ecc71; font-size: 0.85rem; font-weight: bold; margin-top: 3px;"></span>
+                    <!-- يظهر فقط في الخطوة الأولى -->
+                    <div id="footer-step-1">
+                        <div class="price-summary">
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="color:var(--text-primary); font-weight:800; font-size:1.1rem;">الإجمالي:</span>
+                                <span id="discount-display" class="hidden" style="color: #2ecc71; font-size: 0.85rem; font-weight: bold; margin-top: 3px;"></span>
+                            </div>
+                            <div>
+                                <span class="price-summary-value" id="total-price-display">0</span>
+                                <span style="font-size:1.2rem; font-weight:700; color:var(--gold); margin-right:5px;">ر.ع</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="price-summary-value" id="total-price-display">0</span>
-                            <span style="font-size:1.2rem; font-weight:700; color:var(--gold); margin-right:5px;">ر.ع</span>
-                        </div>
+                        <button class="btn-wizard" onclick="goToStep2()">
+                            مواصلة <i class="fas fa-arrow-left"></i>
+                        </button>
                     </div>
-                    <button class="btn-checkout" onclick="submitOrderProcess()" id="submit-btn">
-                        تأكيد وإرسال الطلب <i class="fas fa-check-circle"></i>
-                    </button>
+
+                    <!-- يظهر فقط في الخطوة الثانية -->
+                    <div id="footer-step-2" class="step-2-actions hidden">
+                        <button class="btn-wizard" onclick="submitOrderProcess()" id="submit-btn">
+                            تأكيد الدفع والطلب <i class="fas fa-credit-card"></i>
+                        </button>
+                        <button class="btn-wizard-outline" onclick="goToStep1()">
+                            تعديل الطلب <i class="fas fa-pen"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1094,7 +1226,6 @@
     </main>
 
     <script>
-        // استقبال البيانات من الكنترولر
         const categoriesData = @Html.Raw(ViewBag.CategoriesJson ?? "[]");
         const sizesData = @Html.Raw(ViewBag.SizesJson ?? "[]");
         const fabricsData = @Html.Raw(ViewBag.FabricsJson ?? "[]");
@@ -1109,7 +1240,7 @@
         window.onload = () => {
             initPromoBanner();
             renderCategoriesGrid();
-            renderFabrics(); // دالة جديدة لرسم الأقمشة
+            renderFabrics();
             toggleView('home');
         };
 
@@ -1122,7 +1253,6 @@
             }
         }
 
-        // رسم الأقمشة الديناميكية
         function renderFabrics() {
             const select = document.getElementById('fabric-select');
             if (!select) return;
@@ -1133,7 +1263,7 @@
         }
 
         function toast(title, icon = 'success') {
-            Swal.fire({ title: title, icon: icon, timer: 2500, showConfirmButton: false, toast: true, position: 'top', background: '#141414', color: '#ffffff', customClass: { popup: 'swal2-popup-custom' } });
+            Swal.fire({ title: title, icon: icon, timer: 2500, showConfirmButton: false, toast: true, position: 'top', background: '#1a1a1a', color: '#ffffff', customClass: { popup: 'swal2-popup-custom' } });
         }
 
         function toggleView(screenId) {
@@ -1188,6 +1318,16 @@
             toggleView('shop');
         }
 
+        // --- Wizard Logic (Step 1 -> Step 2) ---
+        function getExpectedDeliveryDate() {
+            const date = new Date();
+            date.setDate(date.getDate() + 2); // تم التعديل إلى يومين هنا
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            return `${yyyy}/${mm}/${dd}`;
+        }
+
         function openOrderModal(productId) {
             categoriesData.forEach(c => {
                 const found = c.Products.find(p => p.Id === productId);
@@ -1199,7 +1339,7 @@
             document.getElementById('custom-design-alert').classList.toggle('hidden', !currentProduct.IsCustomDesign);
             document.getElementById('custom-image-section').classList.toggle('hidden', !currentProduct.IsCustomDesign);
 
-            // تصفير البيانات عند الفتح
+            // Reset Form and Force Step 1
             orderItems = []; currentSelectedSizeId = null; appliedDiscount = 0; activeCouponCode = "";
             document.getElementById('selected-qty').value = 1;
             document.getElementById('custom-image-input').value = "";
@@ -1211,6 +1351,7 @@
             renderSizeOptions();
             renderSelectedSizes();
             calculateLiveTotal();
+            goToStep1(); // Ensure it opens on Step 1
 
             const overlay = document.getElementById('order-modal');
             overlay.classList.remove('hidden');
@@ -1225,6 +1366,50 @@
             setTimeout(() => overlay.classList.add('hidden'), 400);
         }
 
+        function goToStep2() {
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerPhone = document.getElementById('customer-phone').value.trim();
+
+            if(!customerName || !customerPhone) {
+                Swal.fire({title: 'بيانات ناقصة', text: 'يرجى إدخال اسمك ورقم هاتفك لنتواصل معك.', icon: 'warning', background: '#1a1a1a', color: '#fff'});
+                return;
+            }
+
+            const { totalQty, totalPrice } = calculateLiveTotal();
+            if (totalQty === 0) {
+                Swal.fire({title: 'السلة فارغة', text: 'يرجى اختيار مقاس وكمية ثم الضغط على "إضافة".', icon: 'warning', background: '#1a1a1a', color: '#fff'});
+                return;
+            }
+
+            // Update Summary Info for Step 2
+            document.getElementById('expected-date-display').innerText = getExpectedDeliveryDate();
+            document.getElementById('summary-model-name').innerText = currentProduct.Name;
+            document.getElementById('summary-total-qty').innerText = `${totalQty} قطعة`;
+            document.getElementById('summary-total-price').innerText = totalPrice.toFixed(2);
+
+            // Switch Views
+            document.getElementById('step-1-details').classList.remove('active');
+            document.getElementById('step-2-confirmation').classList.add('active');
+
+            // Switch Footer Buttons
+            document.getElementById('footer-step-1').classList.add('hidden');
+            document.getElementById('footer-step-2').classList.remove('hidden');
+
+            // Scroll modal to top smoothly
+            document.querySelector('.modal-content').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToStep1() {
+            // Switch Views
+            document.getElementById('step-2-confirmation').classList.remove('active');
+            document.getElementById('step-1-details').classList.add('active');
+
+            // Switch Footer Buttons
+            document.getElementById('footer-step-2').classList.add('hidden');
+            document.getElementById('footer-step-1').classList.remove('hidden');
+        }
+
+        // --- Cart & Logic ---
         function renderSizeOptions() {
             const container = document.getElementById('size-options-grid');
             container.innerHTML = "";
@@ -1253,9 +1438,7 @@
         }
 
         function addSizeToSelection() {
-            if(!currentSelectedSizeId) {
-                toast("يرجى اختيار المقاس", "warning"); return;
-            }
+            if(!currentSelectedSizeId) { toast("يرجى اختيار المقاس", "warning"); return; }
             const qty = parseInt(document.getElementById('selected-qty').value);
             const sizeObj = sizesData.find(s => s.Id === currentSelectedSizeId);
 
@@ -1266,6 +1449,7 @@
             document.getElementById('selected-qty').value = 1;
             renderSelectedSizes();
             calculateLiveTotal();
+            toast("تمت الإضافة للسلة بنجاح");
         }
 
         function removeSizeFromSelection(index) {
@@ -1296,13 +1480,12 @@
             });
         }
 
-        // الدالة المضافة لربط زر الكوبون
         function applyCouponLogic() {
             calculateLiveTotal(true);
         }
 
         function calculateLiveTotal(isCouponClick = false) {
-            if (!currentProduct) return;
+            if (!currentProduct) return { totalQty: 0, totalPrice: 0 };
             let totalQty = 0; let totalPrice = 0;
             const fabricExtra = parseFloat(document.getElementById('fabric-select').value) || 0;
 
@@ -1313,78 +1496,42 @@
 
             if (currentProduct.IsCustomDesign && totalQty > 0 && totalQty <= 10) totalPrice += (2 * totalQty);
 
-            // معالجة الكوبون
             if (isCouponClick) {
                 const code = document.getElementById('coupon-input').value.trim().toUpperCase();
-                if (!code) {
-                    toast('يرجى إدخال الكود أولاً', 'warning');
-                    return;
-                }
+                if (!code) { toast('يرجى إدخال الكود أولاً', 'warning'); return; }
 
                 fetch(`/Home/ValidateCoupon?code=${encodeURIComponent(code)}`)
                     .then(res => res.json())
                     .then(data => {
-                        if (data.valid) {
-                            appliedDiscount = data.discount;
-                            activeCouponCode = code;
-                            toast(`تم تفعيل الخصم: ${data.discount} ر.ع`);
-                        } else {
-                            appliedDiscount = 0;
-                            activeCouponCode = "";
-                            document.getElementById('coupon-input').value = "";
-                            toast('الكود المدخل غير صحيح أو منتهي', 'error');
-                        }
+                        if (data.valid) { appliedDiscount = data.discount; activeCouponCode = code; toast(`تم تفعيل الخصم: ${data.discount} ر.ع`); }
+                        else { appliedDiscount = 0; activeCouponCode = ""; document.getElementById('coupon-input').value = ""; toast('الكود المدخل غير صحيح أو منتهي', 'error'); }
                         updateDisplay();
-                    })
-                    .catch(err => {
-                        toast('حدث خطأ في الاتصال بالسيرفر', 'error');
-                    });
-            } else {
-                updateDisplay();
-            }
+                    }).catch(() => toast('خطأ في الاتصال', 'error'));
+            } else { updateDisplay(); }
 
             function updateDisplay() {
                 let final = Math.max(0, totalPrice - appliedDiscount);
                 document.getElementById('total-price-display').innerText = final.toFixed(2);
 
-                // إظهار نص الخصم في الشاشة إذا كان مفعلاً
                 const discDisplay = document.getElementById('discount-display');
                 if (appliedDiscount > 0 && totalQty > 0) {
                     discDisplay.innerText = `(وفرت ${appliedDiscount} ر.ع)`;
                     discDisplay.classList.remove('hidden');
-                } else {
-                    discDisplay.classList.add('hidden');
-                }
+                } else { discDisplay.classList.add('hidden'); }
             }
             return { totalQty, totalPrice: Math.max(0, totalPrice - appliedDiscount) };
         }
 
         function submitOrderProcess() {
-            const customerName = document.getElementById('customer-name').value.trim();
-            const customerPhone = document.getElementById('customer-phone').value.trim();
-
-            if(!customerName || !customerPhone) {
-                Swal.fire({title: 'بيانات ناقصة', text: 'يرجى إدخال اسمك ورقم هاتفك لنتواصل معك.', icon: 'warning', background: '#141414', color: '#fff'});
-                return;
-            }
-
-            const { totalQty, totalPrice } = calculateLiveTotal();
-            if (totalQty === 0) {
-                Swal.fire({title: 'السلة فارغة', text: 'يرجى اختيار مقاس وكمية ثم الضغط على "إضافة" قبل التأكيد.', icon: 'warning', background: '#141414', color: '#fff'});
-                return;
-            }
-
             const btn = document.getElementById('submit-btn');
             btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> جاري إرسال الطلب...';
 
             const fabricSelect = document.getElementById('fabric-select');
             const formData = new FormData();
-            formData.append('CustomerName', customerName);
-            formData.append('PhoneNumber', customerPhone);
+            formData.append('CustomerName', document.getElementById('customer-name').value.trim());
+            formData.append('PhoneNumber', document.getElementById('customer-phone').value.trim());
             formData.append('ProductId', currentProduct.Id);
             formData.append('Notes', document.getElementById('order-notes').value || "");
-
-            // حفظ اسم القماش المختار ديناميكياً
             formData.append('FabricType', fabricSelect.options[fabricSelect.selectedIndex].getAttribute('data-name'));
             formData.append('FabricExtraPrice', parseFloat(fabricSelect.value) || 0);
             formData.append('CouponCode', activeCouponCode);
@@ -1403,10 +1550,10 @@
                         html: `<div style="text-align:right; margin-top:20px; line-height: 1.8;">
                                 <div style="background:var(--bg-surface-elevated); border:1px dashed var(--gold); border-radius:16px; padding:20px; text-align:center; margin-bottom: 25px;">
                                     <p style="font-size:0.95rem; color:var(--text-secondary); margin-bottom:5px;">رقم الطلب المرجعي</p>
-                                    <p style="font-size:2.8rem; font-weight:900; color:var(--gold); margin:0; letter-spacing: 2px; text-shadow: 0 0 10px rgba(212,175,55,0.3);">#${data.orderId}</p>
+                                    <p style="font-size:2.8rem; font-weight:900; color:var(--gold); margin:0; letter-spacing: 2px;">#${data.orderId}</p>
                                 </div>
                                 <div style="padding: 0 10px; font-size: 1.1rem;">
-                                    <p>الاسم: <strong style="color:#fff;">${customerName}</strong></p>
+                                    <p>الاسم: <strong style="color:#fff;">${document.getElementById('customer-name').value.trim()}</strong></p>
                                     <p>موعد التسليم المتوقع: <strong style="color:#2ecc71;">${data.deliveryDate}</strong></p>
                                 </div>
                                 <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:25px; text-align:center; padding-top: 15px; border-top: 1px solid var(--border-subtle);">
@@ -1418,11 +1565,14 @@
                         customClass: { confirmButton: 'btn-checkout' }
                     });
                 } else {
-                    Swal.fire({title: 'خطأ في الإرسال', text: data.message, icon: 'error', background: '#141414', color: '#fff'});
+                    Swal.fire({title: 'خطأ في الإرسال', text: data.message, icon: 'error', background: '#1a1a1a', color: '#fff'});
+                    btn.disabled = false; btn.innerHTML = 'تأكيد الدفع والطلب <i class="fas fa-credit-card"></i>';
                 }
             })
-            .catch(() => Swal.fire({title: 'خطأ في الاتصال', text: 'يرجى التحقق من اتصالك بالإنترنت والمحاولة مجدداً.', icon: 'error', background: '#141414', color: '#fff'}))
-            .finally(() => { btn.disabled = false; btn.innerHTML = 'تأكيد وإرسال الطلب <i class="fas fa-check-circle"></i>'; });
+            .catch(() => {
+                Swal.fire({title: 'خطأ في الاتصال', text: 'يرجى التحقق من اتصالك بالإنترنت والمحاولة مجدداً.', icon: 'error', background: '#1a1a1a', color: '#fff'});
+                btn.disabled = false; btn.innerHTML = 'تأكيد الدفع والطلب <i class="fas fa-credit-card"></i>';
+            });
         }
     </script>
 </body>

@@ -25,7 +25,7 @@
                     <th>الإجمالي</th>
                     <th>تاريخ الاستلام</th>
                     <th>الحالة</th>
-                    <th style="text-align: left;">التفاصيل</th>
+                    <th style="text-align: left;">إجراء</th>
                 </tr>
             </thead>
             <tbody>
@@ -48,9 +48,22 @@
                             </span>
                         </td>
                         <td style="text-align: left;">
-                            <a href="/Orders/Details/@item.Id" class="btn-premium btn-gold" style="padding: 8px 15px;" title="عرض التفاصيل والفاتورة">
-                                <i class="fas fa-receipt"></i>
-                            </a>
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                <!-- زر التفاصيل (يظهر للجميع: أدمن وعمال) -->
+                                <a href="/Orders/Details/@item.Id" class="btn-premium btn-gold" style="padding: 8px 15px;" title="عرض التفاصيل">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <!-- زر الحذف (يظهر للأدمن فقط لحماية النظام من العمال) -->
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <form asp-controller="Orders" asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب نهائياً وإلغائه؟');">
+                                        <button type="submit" class="btn-premium btn-outline" style="padding: 8px 15px; border-color: #ff4757; color: #ff4757;" title="حذف الطلب">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
                         </td>
                     </tr>
                 }
