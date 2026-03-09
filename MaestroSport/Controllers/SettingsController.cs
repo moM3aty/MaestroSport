@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using System.IO;
 using System;
 using System.Threading.Tasks;
@@ -16,11 +17,14 @@ namespace MaestroSport.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public SettingsController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
+        // تم إضافة UserManager هنا للتحكم في الحسابات
+        public SettingsController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment, UserManager<IdentityUser> userManager)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -96,6 +100,7 @@ namespace MaestroSport.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateCapacity(int dailyCapacity)
@@ -113,6 +118,49 @@ namespace MaestroSport.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "تم تحديث السعة الإنتاجية اليومية بنجاح";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ==========================================
+        // دوال تغيير الرقم السري
+        // ==========================================
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword, string confirmPassword)
+        {
+            if (newPassword != confirmPassword)
+            {
+                ModelState.AddModelError(string.Empty, "كلمة المرور الجديدة وتأكيدها غير متطابقين.");
+                return View();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("لم يتم العثور على المستخدم.");
+            }
+
+            var changePasswordResult = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            if (!changePasswordResult.Succeeded)
+            {
+                foreach (var error in changePasswordResult.Errors)
+                {
+                    // ترجمة الخطأ الأكثر شيوعاً
+                    string errorMsg = error.Description;
+                    if (error.Code == "PasswordMismatch") errorMsg = "كلمة المرور الحالية التي أدخلتها غير صحيحة.";
+
+                    ModelState.AddModelError(string.Empty, errorMsg);
+                }
+                return View();
+            }
+
+            TempData["SuccessMessage"] = "تم تغيير الرقم السري بنجاح!";
             return RedirectToAction(nameof(Index));
         }
     }

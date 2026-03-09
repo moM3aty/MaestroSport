@@ -49,12 +49,25 @@
                         </td>
                         <td style="text-align: left;">
                             <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                <!-- زر التفاصيل (يظهر للجميع: أدمن وعمال) -->
+
+                                <!-- زر الاستلام للعمال (يظهر فقط إذا كان الطلب قيد المراجعة) -->
+                                @if (User.IsInRole("Worker") && item.Status == "قيد المراجعة")
+                                {
+                                    <form asp-controller="Orders" asp-action="UpdateStatus" method="post" style="display:inline;">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <input type="hidden" name="status" value="جاري التفصيل" />
+                                        <button type="submit" class="btn-premium" style="background: #2ecc71; color: #fff; padding: 8px 15px; border: none;" title="استلام الطلب للبدء فيه">
+                                            <i class="fas fa-clipboard-check"></i> استلام
+                                        </button>
+                                    </form>
+                                }
+
+                                <!-- زر التفاصيل (يظهر للجميع) -->
                                 <a href="/Orders/Details/@item.Id" class="btn-premium btn-gold" style="padding: 8px 15px;" title="عرض التفاصيل">
                                     <i class="fas fa-eye"></i>
                                 </a>
 
-                                <!-- زر الحذف (يظهر للأدمن فقط لحماية النظام من العمال) -->
+                                <!-- زر الحذف (يظهر للأدمن فقط) -->
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <form asp-controller="Orders" asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب نهائياً وإلغائه؟');">

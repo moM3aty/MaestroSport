@@ -5,6 +5,9 @@
 
     var announcement = Model?.FirstOrDefault(s => s.Key == "AnnouncementBar")?.Value;
     var promoBanner = Model?.FirstOrDefault(s => s.Key == "PromoBannerUrl")?.Value;
+
+    var capacityStr = Model?.FirstOrDefault(s => s.Key == "DailyCapacity")?.Value;
+    int dailyCapacity = int.TryParse(capacityStr, out int cap) ? cap : 15;
 }
 
 <div style="max-width: 900px; margin: 0 auto;">
@@ -15,6 +18,35 @@
             <span style="font-weight: bold;">@TempData["SuccessMessage"]</span>
         </div>
     }
+
+    <!-- قسم أمان الحساب الجديد -->
+    <div class="card-premium">
+        <div style="border-bottom: 1px solid var(--accent); padding-bottom: 20px; margin-bottom: 20px;">
+            <h3 style="font-weight: 900; color: var(--gold);"><i class="fas fa-shield-alt" style="margin-left: 10px;"></i> أمان الحساب</h3>
+            <p style="color: var(--text-dim);">إدارة الرقم السري لحساب الإدارة</p>
+        </div>
+        <a href="/Settings/ChangePassword" class="btn-premium btn-gold" style="width: auto;">
+            <i class="fas fa-key"></i> تغيير كلمة المرور
+        </a>
+    </div>
+
+    <!-- إعدادات السعة اليومية -->
+    <div class="card-premium">
+        <div style="border-bottom: 1px solid var(--accent); padding-bottom: 20px; margin-bottom: 30px;">
+            <h3 style="font-weight: 900; color: var(--gold);"><i class="fas fa-industry" style="margin-left: 10px;"></i> سعة التفصيل اليومية</h3>
+            <p style="color: var(--text-dim);">حدد الحد الأقصى لعدد القطع التي يمكنك استقبالها وتفصيلها في اليوم الواحد</p>
+        </div>
+
+        <form asp-action="UpdateCapacity" method="post">
+            <div class="form-group">
+                <label class="form-label">أقصى عدد للقطع يومياً</label>
+                <input type="number" name="dailyCapacity" class="form-control" style="font-size: 1.2rem; font-weight: bold;" value="@dailyCapacity" min="1" required />
+            </div>
+            <button type="submit" class="btn-premium btn-gold" style="width: auto; margin-top: 15px;">
+                <i class="fas fa-save"></i> حفظ السعة
+            </button>
+        </form>
+    </div>
 
     <!-- إعدادات شريط الإعلانات -->
     <div class="card-premium">
@@ -33,7 +65,7 @@
         </form>
     </div>
 
-    <!-- إعدادات البانر الإعلاني الرئيسي (جديد) -->
+    <!-- إعدادات البانر الإعلاني الرئيسي -->
     <div class="card-premium">
         <div style="border-bottom: 1px solid var(--accent); padding-bottom: 20px; margin-bottom: 30px;">
             <h3 style="font-weight: 900; color: var(--gold);"><i class="fas fa-image" style="margin-left: 10px;"></i> البانر الإعلاني الرئيسي</h3>
@@ -68,25 +100,4 @@
             </div>
         </form>
     </div>
-    @{
-        var capacityStr = Model?.FirstOrDefault(s => s.Key == "DailyCapacity")?.Value;
-        int dailyCapacity = int.TryParse(capacityStr, out int cap) ? cap : 15; 
-    }
-    <div class="card-premium">
-        <div style="border-bottom: 1px solid var(--accent); padding-bottom: 20px; margin-bottom: 30px;">
-            <h3 style="font-weight: 900; color: var(--gold);"><i class="fas fa-industry" style="margin-left: 10px;"></i> سعة التفصيل اليومية</h3>
-            <p style="color: var(--text-dim);">حدد الحد الأقصى لعدد القطع التي يمكنك استقبالها وتفصيلها في اليوم الواحد</p>
-        </div>
-
-        <form asp-action="UpdateCapacity" method="post">
-            <div class="form-group">
-                <label class="form-label">أقصى عدد للقطع يومياً</label>
-                <input type="number" name="dailyCapacity" class="form-control" style="font-size: 1.2rem; font-weight: bold;" value="@dailyCapacity" min="1" required />
-            </div>
-            <button type="submit" class="btn-premium btn-gold" style="width: auto; margin-top: 15px;">
-                <i class="fas fa-save"></i> حفظ السعة
-            </button>
-        </form>
-    </div>
 </div>
-<!-- إعدادات السعة اليومية -->

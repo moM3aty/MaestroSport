@@ -7,7 +7,6 @@ using MaestroSport.Data;
 
 namespace MaestroSport.Controllers
 {
-    // تم السماح للأدمن والعمال بالدخول لإدارة الطلبات
     [Authorize(Roles = "Admin,Worker")]
     public class OrdersController : Controller
     {
@@ -18,7 +17,6 @@ namespace MaestroSport.Controllers
             _context = context;
         }
 
-        // عرض قائمة الطلبات
         public async Task<IActionResult> Index()
         {
             var orders = await _context.Orders
@@ -27,7 +25,6 @@ namespace MaestroSport.Controllers
             return View(orders);
         }
 
-        // تفاصيل الطلب والمقاسات التي اختارها الزبون
         public async Task<IActionResult> Details(int id)
         {
             var order = await _context.Orders
@@ -42,7 +39,6 @@ namespace MaestroSport.Controllers
             return View(order);
         }
 
-        // تغيير حالة الطلب (متاحة للعمال والأدمن)
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(int id, string status)
         {
@@ -52,10 +48,17 @@ namespace MaestroSport.Controllers
                 order.Status = status;
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction(nameof(Details), new { id });
+
+            // العودة لنفس الصفحة التي تم الضغط منها لكي لا يخرج العامل من القائمة
+            string referer = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(referer))
+            {
+                return Redirect(referer);
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // دالة حذف الطلب (محمية: للأدمن فقط)
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
@@ -63,12 +66,10 @@ namespace MaestroSport.Controllers
             var order = await _context.Orders.Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.Id == id);
             if (order != null)
             {
-                // حذف العناصر المرتبطة بالطلب أولاً ثم حذف الطلب
                 _context.OrderItems.RemoveRange(order.OrderItems);
                 _context.Orders.Remove(order);
                 await _context.SaveChangesAsync();
             }
-            // إعادة التوجيه للصفحة التي جاء منها (الرئيسية أو صفحة الطلبات)
             return Redirect(Request.Headers["Referer"].ToString() ?? "/Orders");
         }
     }

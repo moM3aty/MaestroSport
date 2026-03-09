@@ -70,14 +70,31 @@
                         </td>
                         <td style="text-align: left;">
                             <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                <a href="/Orders/Details/@item.Id" class="btn-premium btn-gold" style="padding: 8px 15px;"><i class="fas fa-eye"></i></a>
+                                @if (User.IsInRole("Worker") && item.Status == "قيد المراجعة")
+                                {
+                                    <form asp-controller="Orders" asp-action="UpdateStatus" method="post" style="display:inline;">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <input type="hidden" name="status" value="جاري التفصيل" />
+                                        <button type="submit" class="btn-premium" style="background: #2ecc71; color: #fff; padding: 8px 15px; border: none;" title="استلام الطلب للبدء فيه">
+                                            <i class="fas fa-clipboard-check"></i> استلام
+                                        </button>
+                                    </form>
+                                }
 
-                                <!-- زر الحذف الجديد (يعمل فورم صغير لإرسال طلب الحذف) -->
-                                <form asp-controller="Orders" asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب نهائياً وإلغائه؟');">
-                                    <button type="submit" class="btn-premium btn-outline" style="padding: 8px 15px; border-color: #ff4757; color: #ff4757;">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <!-- زر التفاصيل (يظهر للجميع) -->
+                                <a href="/Orders/Details/@item.Id" class="btn-premium btn-gold" style="padding: 8px 15px;" title="عرض التفاصيل">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <!-- زر الحذف (يظهر للأدمن فقط) -->
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <form asp-controller="Orders" asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب نهائياً وإلغائه؟');">
+                                        <button type="submit" class="btn-premium btn-outline" style="padding: 8px 15px; border-color: #ff4757; color: #ff4757;" title="حذف الطلب">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                }
                             </div>
                         </td>
                     </tr>
