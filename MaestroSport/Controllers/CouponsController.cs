@@ -32,7 +32,7 @@ namespace MaestroSport.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Code,DiscountAmount,ExpiryDate,IsActive")] Coupon coupon)
+        public async Task<IActionResult> Create([Bind("Id,Code,DiscountPercentage,ExpiryDate,IsActive")] Coupon coupon) // تم التحديث هنا
         {
             if (ModelState.IsValid)
             {
@@ -57,7 +57,7 @@ namespace MaestroSport.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Code,DiscountAmount,ExpiryDate,IsActive")] Coupon coupon)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Code,DiscountPercentage,ExpiryDate,IsActive,CreatedAt")] Coupon coupon) // تم التحديث هنا
         {
             if (id != coupon.Id) return NotFound();
 

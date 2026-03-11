@@ -34,14 +34,14 @@
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-top: 20px;">
-                <!-- قيمة الخصم -->
+                <!-- نسبة الخصم -->
                 <div class="form-group">
-                    <label asp-for="DiscountAmount" class="form-label">قيمة الخصم</label>
+                    <label asp-for="DiscountPercentage" class="form-label">نسبة الخصم (%)</label>
                     <div style="position: relative;">
-                        <input asp-for="DiscountAmount" type="number" step="0.5" class="form-control" style="padding-left: 45px; font-weight: bold;" />
-                        <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gold); font-weight: bold;">ر.ع</span>
+                        <input asp-for="DiscountPercentage" type="number" step="0.1" min="1" max="100" class="form-control" style="padding-left: 45px; font-weight: bold;" />
+                        <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gold); font-weight: bold;">%</span>
                     </div>
-                    <span asp-validation-for="DiscountAmount" class="text-danger"></span>
+                    <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
                 </div>
 
                 <!-- تاريخ الانتهاء -->

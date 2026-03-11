@@ -1,10 +1,7 @@
 ﻿let currentProduct = null;
 let appliedDiscount = 0;
 let activeCouponCode = "";
-
-// متغيرات السلة المصغرة
-let selectedSizeId = null;
-let selectedOrderItems = []; // مصفوفة لتخزين المقاسات والكميات المختارة
+let appliedDiscountPercentage = 0; // تم التغيير لتخزين النسبة المئوية
 
 function toast(title, icon = 'success') {
     Swal.fire({
@@ -48,9 +45,7 @@ function loadCategory(catId) {
         cat.Products.forEach(item => {
             list.innerHTML += `
                 <div class="product-item">
-                    <div class="product-
-
-                    "><img src="/${item.ImageUrl}" onerror="this.src='https://placehold.co/400x500/111/D4AF37?text=No+Image'"></div>
+                    <div class="product-img"><img src="/${item.ImageUrl}" onerror="this.src='https://placehold.co/400x500/111/D4AF37?text=No+Image'"></div>
                     <div class="product-info">
                         <h3 style="color: #ffffff;">${item.Name} ${item.IsCustomDesign ? '<br><small style="color:#D4AF37; font-size:0.8rem;">(تصميم خاص)</small>' : ''}</h3>
                         <p style="color:#D4AF37; font-weight:900; font-size:1.5rem; margin-bottom:15px;">${item.BasePrice} ريال</p>
@@ -100,7 +95,7 @@ function openOrderModal(productId) {
         `;
     });
 
-    appliedDiscount = 0;
+    appliedDiscountPercentage = 0; // تصفير نسبة الخصم عند فتح منتج جديد
     activeCouponCode = "";
     document.getElementById('coupon-input').value = "";
     document.getElementById('order-notes').value = "";
@@ -200,11 +195,11 @@ function calculateLiveTotal(isCouponClick = false) {
             .then(res => res.json())
             .then(data => {
                 if (data.valid) {
-                    appliedDiscount = data.discount;
+                    appliedDiscountPercentage = data.discountPercentage; // حفظ النسبة
                     activeCouponCode = code;
-                    Swal.fire({ title: 'تم تفعيل الخصم!', text: `حصلت على خصم ${data.discount} ريال`, icon: 'success', background: '#151515', color: '#fff' });
+                    Swal.fire({ title: 'تم تفعيل الخصم!', text: `حصلت على خصم بنسبة ${data.discountPercentage}%`, icon: 'success', background: '#151515', color: '#fff' });
                 } else {
-                    appliedDiscount = 0; activeCouponCode = "";
+                    appliedDiscountPercentage = 0; activeCouponCode = "";
                     Swal.fire({ title: 'عفواً!', text: 'كود غير صحيح', icon: 'error', background: '#151515', color: '#fff' });
                 }
                 updateDisplay();
@@ -214,12 +209,30 @@ function calculateLiveTotal(isCouponClick = false) {
     }
 
     function updateDisplay() {
-        let final = totalPrice - appliedDiscount;
+        // حساب الخصم الفعلي من الإجمالي
+        let discountAmount = totalPrice * (appliedDiscountPercentage / 100);
+        let final = totalPrice - discountAmount;
         if (final < 0) final = 0;
         document.getElementById('total-price-display').innerText = final.toFixed(2);
     }
 
-    return { totalQty, totalPrice: (totalPrice - appliedDiscount) };
+    // إرجاع الإجمالي بعد الخصم
+    let currentDiscountAmount = totalPrice * (appliedDiscountPercentage / 100);
+    return { totalQty, totalPrice: (totalPrice - currentDiscountAmount) };
+}
+updateDisplay();
+            });
+    } else {
+    updateDisplay();
+}
+
+function updateDisplay() {
+    let final = totalPrice - appliedDiscount;
+    if (final < 0) final = 0;
+    document.getElementById('total-price-display').innerText = final.toFixed(2);
+}
+
+return { totalQty, totalPrice: (totalPrice - appliedDiscount) };
 }
 
 function closeModal() { document.getElementById('order-modal').classList.add('hidden'); }

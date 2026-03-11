@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MaestroSport.Models
 {
-    // كلاس لتمثيل أكواد الخصم في قاعدة البيانات
     public class Coupon
     {
         [Key]
@@ -12,12 +11,14 @@ namespace MaestroSport.Models
 
         [Required(ErrorMessage = "كود الخصم مطلوب")]
         [Display(Name = "كود الخصم")]
-        public string Code { get; set; } // مثال: MYSTRO20
+        public string Code { get; set; }
 
-        [Required(ErrorMessage = "قيمة الخصم مطلوبة")]
-        [Display(Name = "قيمة الخصم (ريال)")]
+        [Display(Name = "نسبة الخصم (%)")]
         [Column(TypeName = "decimal(18,2)")]
-        public decimal DiscountAmount { get; set; }
+        public decimal DiscountPercentage { get; set; }
+
+        [Display(Name = "هل هو كود قطعة مجانية؟")]
+        public bool IsFreePiece { get; set; } = false;
 
         [Display(Name = "تاريخ الانتهاء")]
         public DateTime? ExpiryDate { get; set; }

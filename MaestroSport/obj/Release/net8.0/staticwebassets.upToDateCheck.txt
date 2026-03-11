@@ -1,5 +1,7 @@
 wwwroot\css\style.css
 wwwroot\favicon.ico
+wwwroot\images\banners\51fb3aa8-a2bf-4afb-9bc3-407d9d5c1507_logo.png
+wwwroot\images\custom_designs\9353855e-5272-459e-ba53-90689e6466dc_2.jpg
 wwwroot\images\logo.png
 wwwroot\images\p1.webp
 wwwroot\images\p2.webp
@@ -66,4 +68,3 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\images\banners\51fb3aa8-a2bf-4afb-9bc3-407d9d5c1507_logo.png
