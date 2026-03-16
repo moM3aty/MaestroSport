@@ -14,22 +14,30 @@ using System.Collections.Generic;
 
 namespace MaestroSport.Controllers
 {
+    // DTO لاستقبال الطلب المجمع من سلة المشتريات
     public class OrderSubmissionDto
     {
-        // تم إزالة ProductId من هنا لأن السلة أصبحت تحتوي على عدة موديلات
         public string CustomerName { get; set; }
         public string PhoneNumber { get; set; }
         public string Notes { get; set; }
         public string FabricType { get; set; }
         public decimal FabricExtraPrice { get; set; }
         public string CouponCode { get; set; }
-        public string ItemsJson { get; set; }
+
+        // المتغير الجديد الذي يحمل السلة بالكامل بصيغة JSON
+        public string CartJson { get; set; }
         public IFormFile CustomImage { get; set; }
+    }
+
+    // كلاسات مساعدة لفك تشفير السلة
+    public class CartProductDto
+    {
+        public int ProductId { get; set; }
+        public List<OrderItemDto> Sizes { get; set; }
     }
 
     public class OrderItemDto
     {
-        public int ProductId { get; set; } // تمت إضافته هنا ليكون لكل قطعة موديل خاص بها
         public int SizeId { get; set; }
         public int Quantity { get; set; }
     }
@@ -67,7 +75,7 @@ namespace MaestroSport.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ValidateCoupon(string code, int totalQty, int categoryId, string fabricName)
+        public async Task<IActionResult> ValidateCoupon(string code, int totalQty, int? categoryId, string fabricName)
         {
             try
             {
@@ -78,19 +86,14 @@ namespace MaestroSport.Controllers
 
                 if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate >= DateTime.Now))
                 {
-                    // 1. فحص الحد الأدنى
-                    if (coupon.MinQuantity > 0 && totalQty < coupon.MinQuantity)
-                        return Json(new { valid = false, message = $"يتطلب طلب {coupon.MinQuantity} قطع لتفعيل الكود." });
-
-                    // 2. فحص القسم المخصص
-                    if (coupon.TargetCategoryId.HasValue && coupon.TargetCategoryId.Value != categoryId)
+                    // التحقق من القسم (لو تم تحديد قسم للكوبون)
+                    if (categoryId.HasValue && coupon.TargetCategoryId.HasValue && coupon.TargetCategoryId.Value != categoryId.Value)
                         return Json(new { valid = false, message = "هذا الكود غير مخصص لموديلات هذا القسم." });
 
-                    // 3. فحص القماش المخصص
+                    // التحقق من القماش المخصص
                     if (!string.IsNullOrEmpty(coupon.TargetFabricName) && coupon.TargetFabricName != fabricName)
                         return Json(new { valid = false, message = $"هذا الكود مخصص فقط إذا اخترت قماش ({coupon.TargetFabricName})." });
 
-                    // إذا اجتاز كل الشروط بنجاح
                     if (coupon.IsFreePiece)
                         return Json(new { valid = true, isFreePiece = true });
 
@@ -107,16 +110,21 @@ namespace MaestroSport.Controllers
         {
             try
             {
-                var itemsList = JsonSerializer.Deserialize<List<OrderItemDto>>(request.ItemsJson);
-                if (itemsList == null || !itemsList.Any()) return Json(new { success = false, message = "الطلب فارغ" });
+                // [حماية من الأخطاء] التأكد من أن السلة ليست فارغة لمنع انهيار النظام ArgumentNullException
+                if (string.IsNullOrWhiteSpace(request.CartJson))
+                {
+                    return Json(new { success = false, message = "بيانات السلة مفقودة. يرجى تحديث الصفحة والمحاولة مجدداً." });
+                }
 
-                // تجميع القطع المتشابهة في الموديل والمقاس
-                var groupedItems = itemsList.GroupBy(i => new { i.ProductId, i.SizeId })
-                                            .Select(g => new OrderItemDto { ProductId = g.Key.ProductId, SizeId = g.Key.SizeId, Quantity = g.Sum(i => i.Quantity) })
-                                            .ToList();
+                var cartItems = JsonSerializer.Deserialize<List<CartProductDto>>(request.CartJson);
+                if (cartItems == null || !cartItems.Any())
+                {
+                    return Json(new { success = false, message = "السلة فارغة" });
+                }
 
-                int requestedQty = groupedItems.Sum(i => i.Quantity);
+                int requestedQty = cartItems.SelectMany(c => c.Sizes).Sum(s => s.Quantity);
 
+                // التحقق من السعة اليومية
                 int dailyCapacity = 15;
                 var capacitySetting = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "DailyCapacity");
                 if (capacitySetting != null && int.TryParse(capacitySetting.Value, out int cap)) dailyCapacity = cap;
@@ -132,6 +140,7 @@ namespace MaestroSport.Controllers
                     else return Json(new { success = false, message = $"عذراً، السعة الإنتاجية المتبقية لهذا اليوم هي {capacityLeft} قطعة فقط." });
                 }
 
+                // إنشاء كود هدية إذا طلب 10 فأكثر
                 string generatedGiftCode = null;
                 if (requestedQty >= 10)
                 {
@@ -150,6 +159,7 @@ namespace MaestroSport.Controllers
                     ExpectedDeliveryDate = DateTime.Now.AddDays(2)
                 };
 
+                // رفع الصورة إن وجدت
                 if (request.CustomImage != null && request.CustomImage.Length > 0)
                 {
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "custom_designs");
@@ -161,52 +171,64 @@ namespace MaestroSport.Controllers
                 }
 
                 decimal totalAmount = 0;
-                int totalQty = 0;
-                bool isAnyCustomDesign = false;
+                decimal firstProductBasePrice = 0;
 
-                foreach (var item in groupedItems)
+                // الدوران على كل الموديلات في السلة
+                foreach (var cartItem in cartItems)
                 {
-                    var product = await _context.Products.FindAsync(item.ProductId);
-                    var size = await _context.Sizes.FindAsync(item.SizeId);
-                    if (product == null || size == null) continue;
+                    var product = await _context.Products.FindAsync(cartItem.ProductId);
+                    if (product == null) continue;
 
-                    if (product.IsCustomDesign) isAnyCustomDesign = true;
+                    if (firstProductBasePrice == 0) firstProductBasePrice = product.BasePrice;
 
-                    decimal unitPrice = product.BasePrice + size.AdditionalPrice;
-                    totalAmount += (unitPrice * item.Quantity);
-                    totalQty += item.Quantity;
+                    var groupedSizes = cartItem.Sizes.GroupBy(i => i.SizeId).Select(g => new OrderItemDto { SizeId = g.Key, Quantity = g.Sum(i => i.Quantity) }).ToList();
+                    int productQty = 0;
 
-                    order.OrderItems.Add(new OrderItem { ProductId = product.Id, SizeId = size.Id, Quantity = item.Quantity, UnitPrice = unitPrice, CustomDesignImageUrl = order.CustomDesignImageUrl ?? "" });
+                    foreach (var sizeItem in groupedSizes)
+                    {
+                        var size = await _context.Sizes.FindAsync(sizeItem.SizeId);
+                        if (size == null) continue;
+
+                        decimal unitPrice = product.BasePrice + size.AdditionalPrice;
+                        totalAmount += (unitPrice * sizeItem.Quantity);
+                        productQty += sizeItem.Quantity;
+
+                        order.OrderItems.Add(new OrderItem
+                        {
+                            ProductId = product.Id,
+                            SizeId = size.Id,
+                            Quantity = sizeItem.Quantity,
+                            UnitPrice = unitPrice,
+                            CustomDesignImageUrl = order.CustomDesignImageUrl ?? ""
+                        });
+                    }
+
+                    // إضافة رسوم التصميم الخاص للمنتج إذا كان العدد الإجمالي في السلة أقل من 11
+                    if (product.IsCustomDesign && requestedQty > 0 && requestedQty <= 10)
+                    {
+                        totalAmount += (2 * productQty);
+                    }
                 }
 
-                totalAmount += (request.FabricExtraPrice * totalQty);
+                // إضافة سعر القماش الإضافي للعدد الكلي
+                totalAmount += (request.FabricExtraPrice * requestedQty);
 
-                // رسوم التصميم الخاص تطبق إذا كان هناك أي موديل بتصميم خاص والعدد الإجمالي أقل من أو يساوي 10
-                if (isAnyCustomDesign && totalQty > 0 && totalQty <= 10)
-                {
-                    totalAmount += (2 * totalQty);
-                }
-
+                // تطبيق الكوبون في الباك إند
                 if (!string.IsNullOrEmpty(request.CouponCode))
                 {
                     var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == request.CouponCode && c.IsActive);
                     if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate >= DateTime.Now))
                     {
                         bool isValid = true;
-                        if (coupon.MinQuantity > 0 && totalQty < coupon.MinQuantity) isValid = false;
-
-                        // تم تجاهل شرط القسم لأن السلة قد تحتوي على أقسام مختلفة (يمكن تطويرها لاحقاً إذا رغبت)
-                        // تم تجاهل شرط القماش لنفس السبب
+                        if (!string.IsNullOrEmpty(coupon.TargetFabricName) && coupon.TargetFabricName != request.FabricType) isValid = false;
 
                         if (isValid)
                         {
                             if (coupon.IsFreePiece)
                             {
-                                // خصم متوسط سعر القطعة إذا كانت السلة مختلطة أو سعر أول قطعة
-                                var firstProduct = await _context.Products.FindAsync(groupedItems.First().ProductId);
-                                decimal freePieceValue = (firstProduct?.BasePrice ?? 0) + request.FabricExtraPrice;
+                                decimal freePieceValue = firstProductBasePrice + request.FabricExtraPrice;
                                 totalAmount -= freePieceValue;
-                                coupon.IsActive = false;
+                                coupon.IsActive = false; // تعطيل الكود لأنه قطعة مجانية تُستخدم مرة واحدة
                             }
                             else
                             {

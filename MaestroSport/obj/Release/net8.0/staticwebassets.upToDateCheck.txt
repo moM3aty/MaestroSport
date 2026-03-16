@@ -68,3 +68,4 @@ wwwroot\images\custom_designs\9353855e-5272-459e-ba53-90689e6466dc_2.jpg
 wwwroot\images\banners\51fb3aa8-a2bf-4afb-9bc3-407d9d5c1507_logo.png
 wwwroot\favicon.ico
 wwwroot\css\style.css
+wwwroot\images\custom_designs\8be07137-5a77-47fa-baad-f5293146647d_logo-mini.jpg
