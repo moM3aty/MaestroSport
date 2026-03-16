@@ -1,89 +1,76 @@
 ﻿@model MaestroSport.Models.Coupon
-
 @{
-    ViewData["Title"] = "تعديل كود الخصم";
+    ViewData["Title"] = "تعديل كود خصم";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div style="max-width: 800px; margin: 0 auto;">
-    <!-- الرأس -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <div>
-            <h2 style="font-weight: 900; color: var(--gold); letter-spacing: -1px;">تحرير كود الخصم</h2>
-            <p style="color: #ffffff; opacity: 0.8;">تحديث بيانات الكود: <span style="color: var(--gold); font-weight: bold; letter-spacing: 2px;">@Model.Code</span></p>
-        </div>
-        <a asp-action="Index" class="btn-premium btn-outline">
-            <i class="fas fa-arrow-right" style="margin-left: 8px;"></i> العودة للقائمة
-        </a>
-    </div>
-
+<div style="max-width: 900px; margin: 0 auto;">
     <div class="card-premium">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-4" style="font-weight: bold;"></div>
+        <h3 style="color: var(--gold); margin-bottom: 25px;"><i class="fas fa-edit"></i> تعديل شروط الكود</h3>
 
-            <!-- الحقول المخفية -->
+        <form asp-action="Edit">
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="CreatedAt" />
 
-            <div class="form-group">
-                <label asp-for="Code" class="form-label">رمز الكوبون</label>
-                <div style="position: relative;">
-                    <input asp-for="Code" class="form-control"
-                           style="text-transform: uppercase; letter-spacing: 3px; font-weight: 900; font-size: 1.4rem; padding-right: 50px; border-style: dashed; border-width: 2px;" />
-                    <i class="fas fa-edit" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 1.1rem;"></i>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label asp-for="Code" class="form-label">رمز الكود</label>
+                    <input asp-for="Code" class="form-control" style="text-transform: uppercase; font-family: monospace; font-weight: bold; color: var(--gold);" required />
                 </div>
-                <span asp-validation-for="Code" class="text-danger"></span>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-top: 20px;">
                 <div class="form-group">
                     <label asp-for="DiscountPercentage" class="form-label">نسبة الخصم (%)</label>
-                    <div style="position: relative;">
-                        <input asp-for="DiscountPercentage" type="number" step="0.1" min="1" max="100" class="form-control" style="font-weight: bold; color: var(--gold); padding-left: 45px;" />
-                        <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gold); font-weight: bold;">%</span>
-                    </div>
-                    <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="ExpiryDate" class="form-label">تاريخ الانتهاء</label>
-                    <input asp-for="ExpiryDate" type="date" class="form-control" />
+                    <input asp-for="DiscountPercentage" type="number" step="0.1" class="form-control" />
                 </div>
             </div>
 
-            <!-- تنبيه في حال انتهاء الصلاحية -->
-            @if (Model.ExpiryDate.HasValue && Model.ExpiryDate < DateTime.Now)
-            {
-                <div style="background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; color: #ff4757; padding: 12px; border-radius: 10px; margin-top: 15px; font-size: 0.9rem;">
-                    <i class="fas fa-exclamation-triangle"></i> تنبيه: هذا الكود منتهي الصلاحية حالياً.
-                </div>
-            }
-
-            <div class="form-group" style="background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 15px; border: 1px solid var(--accent); margin-top: 30px;">
-                <label style="display: flex; align-items: center; gap: 15px; cursor: pointer;">
-                    <input asp-for="IsActive" type="checkbox" style="width: 22px; height: 22px; accent-color: var(--gold); cursor: pointer;" />
-                    <div>
-                        <span style="font-weight: 900; color: #fff; font-size: 1.1rem;">حالة الكود (نشط / معطل)</span>
-                        <p style="font-size: 0.85rem; margin: 0; color: var(--text-dim);">تحكم في ما إذا كان الكود متاحاً للاستخدام حالياً أم لا.</p>
-                    </div>
+            <div class="form-group" style="background: rgba(212, 175, 55, 0.05); padding: 15px; border-radius: 10px; border: 1px dashed var(--gold); margin-bottom: 25px;">
+                <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; margin: 0;">
+                    <input asp-for="IsFreePiece" type="checkbox" style="width: 20px; height: 20px; accent-color: var(--gold);" />
+                    <span style="font-weight: bold; color: var(--gold);">كود يعطي "قطعة مجانية"</span>
                 </label>
             </div>
 
-            <!-- أزرار التحكم -->
-            <div style="display: flex; gap: 15px; margin-top: 40px; padding-top: 25px; border-top: 1px solid var(--accent);">
-                <button type="submit" class="btn-premium btn-gold" style="padding: 15px 50px; font-size: 1.1rem; flex: 1; justify-content: center;">
-                    <i class="fas fa-save" style="margin-left: 10px;"></i> حفظ التعديلات الملكية
-                </button>
-                <a asp-action="Index" class="btn-premium btn-outline" style="padding: 15px 30px;">
-                    إلغاء
-                </a>
+            <h5 style="color: var(--text-dim); border-bottom: 1px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px;">شروط الاستخدام والصلاحية</h5>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label asp-for="TargetCategoryId" class="form-label">القسم</label>
+                    <select asp-for="TargetCategoryId" class="form-control" asp-items="ViewBag.CategoryId">
+                        <option value="">-- جميع الأقسام --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="TargetFabricName" class="form-label">القماش</label>
+                    <select asp-for="TargetFabricName" class="form-control" asp-items="ViewBag.Fabrics">
+                        <option value="">-- جميع الأقمشة --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="MinQuantity" class="form-label">الحد الأدنى للقطع</label>
+                    <input asp-for="MinQuantity" type="number" class="form-control" />
+                </div>
+            </div>
+
+            <!-- تمت إضافة تاريخ الانتهاء وحالة التفعيل هنا -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label asp-for="ExpiryDate" class="form-label">تاريخ الانتهاء</label>
+                    <input asp-for="ExpiryDate" type="date" class="form-control" />
+                    <small style="color: var(--text-dim); display: block; margin-top: 5px;">اتركه فارغاً ليعمل الكوبون بصلاحية مفتوحة.</small>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; background: rgba(46, 204, 113, 0.05); padding: 15px; border-radius: 10px; border: 1px dashed #2ecc71;">
+                    <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; margin: 0;">
+                        <input asp-for="IsActive" type="checkbox" style="width: 20px; height: 20px; accent-color: #2ecc71;" />
+                        <span style="font-weight: bold; color: #2ecc71;">تفعيل الكوبون (نشط)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--accent);">
+                <button type="submit" class="btn-premium btn-gold" style="flex: 1;"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                <a asp-action="Index" class="btn-premium btn-outline">إلغاء</a>
             </div>
         </form>
     </div>
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}

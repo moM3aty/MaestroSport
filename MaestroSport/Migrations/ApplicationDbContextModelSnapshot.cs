@@ -77,6 +77,15 @@ namespace MaestroSport.Migrations
                     b.Property<bool>("IsFreePiece")
                         .HasColumnType("bit");
 
+                    b.Property<int>("MinQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TargetCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TargetFabricName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Coupons");

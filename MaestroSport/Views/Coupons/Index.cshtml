@@ -2,16 +2,17 @@
 @{
     ViewData["Title"] = "أكواد الخصم";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var categories = ViewBag.Categories as Dictionary<int, string>;
 }
 
 <div class="card-premium">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
         <div>
-            <h3 style="font-weight: 900; color: var(--gold);"><i class="fas fa-ticket-alt" style="margin-left: 10px;"></i> حملات الخصم الملكية</h3>
-            <p style="color: var(--text-dim); font-size: 0.9rem;">أدر كوبونات التخفيض الفعالة لعملائك لتعزيز المبيعات</p>
+            <h3 style="font-weight: 900; color: var(--gold);"><i class="fas fa-ticket-alt" style="margin-left: 10px;"></i> حملات الخصم المخصصة</h3>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">أدر كوبوناتك وتحكم بشروطها (قماش معين، قسم معين، حد أدنى)</p>
         </div>
         <a href="/Coupons/Create" class="btn-premium btn-gold">
-            <i class="fas fa-plus-circle"></i> إنشاء كود خصم جديد
+            <i class="fas fa-plus-circle"></i> إنشاء كود خصم
         </a>
     </div>
 
@@ -19,11 +20,11 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 200px;">رمز الكود</th>
-                    <th>نسبة الخصم / نوع الهدية</th>
-                    <th>تاريخ الانتهاء</th>
-                    <th>حالة الكوبون</th>
-                    <th style="text-align: left;">خيارات التحكم</th>
+                    <th>الكود</th>
+                    <th>الخصم</th>
+                    <th>شروط الاستخدام</th>
+                    <th>الحالة</th>
+                    <th style="text-align: left;">خيارات</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,16 +32,14 @@
                 {
                     <tr>
                         <td>
-                            <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--gold); padding: 8px 15px; border-radius: 10px; width: fit-content;">
-                                <span style="font-family: 'Courier New', Courier, monospace; font-size: 1.2rem; font-weight: 900; letter-spacing: 2px; color: var(--gold);">@item.Code</span>
+                            <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed var(--gold); padding: 5px 15px; border-radius: 8px; width: fit-content;">
+                                <span style="font-family: monospace; font-size: 1.1rem; font-weight: 900; letter-spacing: 2px; color: var(--gold);">@item.Code</span>
                             </div>
                         </td>
                         <td>
                             @if (item.IsFreePiece)
                             {
-                                <span style="font-weight: 900; font-size: 1.05rem; color: #f1c40f; background: rgba(241, 196, 15, 0.1); padding: 5px 10px; border-radius: 8px; border: 1px dashed #f1c40f;">
-                                    <i class="fas fa-gift"></i> قطعة مجانية
-                                </span>
+                                <span style="font-weight: 900; font-size: 0.9rem; color: #f1c40f; background: rgba(241, 196, 15, 0.1); padding: 4px 8px; border-radius: 6px;"><i class="fas fa-gift"></i> قطعة مجانية</span>
                             }
                             else
                             {
@@ -48,45 +47,27 @@
                             }
                         </td>
                         <td>
-                            <span style="color: var(--text-dim);">
-                                <i class="far fa-calendar-alt" style="margin-left: 5px;"></i>
-                                @(item.ExpiryDate?.ToString("yyyy/MM/dd") ?? "صلاحية مفتوحة")
-                            </span>
+                            <div style="display: flex; flex-direction: column; gap: 5px; font-size: 0.85rem; color: var(--text-dim);">
+                                <span><i class="fas fa-box text-gold"></i> الحد الأدنى: @(item.MinQuantity > 0 ? $"{item.MinQuantity} قطع" : "أي عدد")</span>
+                                <span><i class="fas fa-layer-group text-gold"></i> القسم: @(item.TargetCategoryId.HasValue && categories.ContainsKey(item.TargetCategoryId.Value) ? categories[item.TargetCategoryId.Value] : "جميع الأقسام")</span>
+                                <span><i class="fas fa-scroll text-gold"></i> القماش: @(!string.IsNullOrEmpty(item.TargetFabricName) ? item.TargetFabricName : "أي قماش")</span>
+                            </div>
                         </td>
                         <td>
                             @if (item.IsActive && (!item.ExpiryDate.HasValue || item.ExpiryDate >= DateTime.Now))
                             {
-                                <span class="badge badge-success">
-                                    <i class="fas fa-check-circle" style="margin-left: 5px;"></i> نشط حالياً
-                                </span>
+                                <span class="badge badge-success"><i class="fas fa-check"></i> نشط</span>
                             }
                             else
                             {
-                                <span class="badge" style="border: 1px solid #ff4757; color: #ff4757; background: rgba(255, 71, 87, 0.05);">
-                                    <i class="fas fa-times-circle" style="margin-left: 5px;"></i> منتهي / معطل
-                                </span>
+                                <span class="badge" style="border: 1px solid #ff4757; color: #ff4757;"><i class="fas fa-times"></i> معطل/منتهي</span>
                             }
                         </td>
                         <td style="text-align: left;">
-                            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                                <a href="/Coupons/Edit/@item.Id" class="btn-premium btn-outline" style="padding: 10px 15px;" title="تعديل">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="/Coupons/Delete/@item.Id" class="btn-premium btn-outline"
-                                   style="padding: 10px 15px; border-color: #ff4757; color: #ff4757;"
-                                   onclick="return confirm('هل تريد حذف هذا الكوبون نهائياً؟')" title="حذف">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                <a href="/Coupons/Edit/@item.Id" class="btn-premium btn-outline" style="padding: 8px 12px;"><i class="fas fa-edit"></i></a>
+                                <a href="/Coupons/Delete/@item.Id" class="btn-premium btn-outline" style="padding: 8px 12px; border-color: #ff4757; color: #ff4757;" onclick="return confirm('حذف نهائي؟')"><i class="fas fa-trash-alt"></i></a>
                             </div>
-                        </td>
-                    </tr>
-                }
-                @if (!Model.Any())
-                {
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 80px; color: var(--text-dim);">
-                            <i class="fas fa-tags fa-4x" style="display: block; margin-bottom: 20px; opacity: 0.1;"></i>
-                            لا توجد أكواد خصم نشطة حالياً.. ابدأ بإضافة الكود الأول
                         </td>
                     </tr>
                 }

@@ -1771,70 +1771,79 @@
 
         function applyCouponLogic() { calculateLiveTotal(true); }
 
-        function calculateLiveTotal(isCouponClick = false) {
-            let totalQty = 0; let totalPrice = 0;
-            if (!currentProduct) return { totalQty, totalPrice };
-            const fabricExtra = parseFloat(document.getElementById('fabric-select').value) || 0;
+          function calculateLiveTotal(isCouponClick = false) {
+              let totalQty = 0; let totalPrice = 0;
+              if (!currentProduct) return { totalQty, totalPrice };
 
-            orderItems.forEach(item => {
-                totalQty += item.Quantity;
-                totalPrice += item.Quantity * (currentProduct.BasePrice + item.ExtraPrice + fabricExtra);
-            });
+              const fabricSelect = document.getElementById('fabric-select');
+              const fabricExtra = parseFloat(fabricSelect.value) || 0;
 
-            if (currentProduct.IsCustomDesign && totalQty > 0 && totalQty <= 10) totalPrice += (2 * totalQty);
+              // جلب اسم القماش ورقم القسم للتحقق من شروط الكوبون
+              const currentFabricName = fabricSelect.options[fabricSelect.selectedIndex].getAttribute('data-name');
+              const currentCategoryId = currentProduct.CategoryId;
 
-            if (isCouponClick) {
-                const code = document.getElementById('coupon-input').value.trim().toUpperCase();
-                if (!code) { toast('يرجى إدخال الكود أولاً', 'warning'); return; }
+              orderItems.forEach(item => {
+                  totalQty += item.Quantity;
+                  totalPrice += item.Quantity * (currentProduct.BasePrice + item.ExtraPrice + fabricExtra);
+              });
 
-                fetch(`/Home/ValidateCoupon?code=${encodeURIComponent(code)}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.valid) {
-                            if(data.isFreePiece) {
-                                appliedFreePiece = true;
-                                appliedDiscount = 0;
-                                activeCouponCode = code;
-                                toast(`تم تفعيل الكوبون: ستحصل على قطعة مجانية! 🎁`);
-                            } else {
-                                appliedFreePiece = false;
-                                appliedDiscount = data.discountPercentage;
-                                activeCouponCode = code;
-                                toast(`تم تفعيل الخصم: ${data.discountPercentage}%`);
-                            }
-                        }
-                        else {
-                            appliedDiscount = 0;
-                            appliedFreePiece = false;
-                            activeCouponCode = "";
-                            document.getElementById('coupon-input').value = "";
-                            toast(data.message || 'الكود غير صحيح أو منتهي', 'error');
-                        }
-                        updateDisplay();
-                    }).catch(() => toast('خطأ في الاتصال', 'error'));
-            } else { updateDisplay(); }
+              if (currentProduct.IsCustomDesign && totalQty > 0 && totalQty <= 10) totalPrice += (2 * totalQty);
 
-            function updateDisplay() {
-                let discountAmount = 0;
-                if (appliedFreePiece && totalQty > 0) {
-                    discountAmount = currentProduct.BasePrice + fabricExtra;
-                } else {
-                    discountAmount = totalPrice * (appliedDiscount / 100);
-                }
+              if (isCouponClick) {
+                  const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+                  if (!code) { toast('يرجى إدخال الكود أولاً', 'warning'); return; }
 
-                let final = Math.max(0, totalPrice - discountAmount);
-                document.getElementById('total-price-display').innerText = final.toFixed(2);
+                  // تمرير المعطيات الجديدة للكنترولر
+                  const url = `/Home/ValidateCoupon?code=${encodeURIComponent(code)}&totalQty=${totalQty}&categoryId=${currentCategoryId}&fabricName=${encodeURIComponent(currentFabricName)}`;
 
-                const discDisplay = document.getElementById('discount-display');
-                if (discountAmount > 0 && totalQty > 0) {
-                    discDisplay.innerText = `(وفرت ${discountAmount.toFixed(2)} ر.ع)`;
-                    discDisplay.classList.remove('hidden');
-                } else { discDisplay.classList.add('hidden'); }
-            }
+                  fetch(url)
+                      .then(res => res.json())
+                      .then(data => {
+                          if (data.valid) {
+                              if(data.isFreePiece) {
+                                  appliedFreePiece = true;
+                                  appliedDiscount = 0;
+                                  activeCouponCode = code;
+                                  toast(`تم تفعيل الكوبون: ستحصل على قطعة مجانية! 🎁`);
+                              } else {
+                                  appliedFreePiece = false;
+                                  appliedDiscount = data.discountPercentage;
+                                  activeCouponCode = code;
+                                  toast(`تم تفعيل الخصم: ${data.discountPercentage}%`);
+                              }
+                          }
+                          else {
+                              appliedDiscount = 0;
+                              appliedFreePiece = false;
+                              activeCouponCode = "";
+                              document.getElementById('coupon-input').value = "";
+                              toast(data.message || 'الكود غير صحيح', 'error');
+                          }
+                          updateDisplay();
+                      }).catch(() => toast('خطأ في الاتصال بالسيرفر', 'error'));
+              } else { updateDisplay(); }
 
-            let finalDiscountAmount = appliedFreePiece ? (currentProduct.BasePrice + fabricExtra) : (totalPrice * (appliedDiscount / 100));
-            return { totalQty, totalPrice: Math.max(0, totalPrice - finalDiscountAmount) };
-        }
+              function updateDisplay() {
+                  let discountAmount = 0;
+                  if (appliedFreePiece && totalQty > 0) {
+                      discountAmount = currentProduct.BasePrice + fabricExtra;
+                  } else {
+                      discountAmount = totalPrice * (appliedDiscount / 100);
+                  }
+
+                  let final = Math.max(0, totalPrice - discountAmount);
+                  document.getElementById('total-price-display').innerText = final.toFixed(2);
+
+                  const discDisplay = document.getElementById('discount-display');
+                  if (discountAmount > 0 && totalQty > 0) {
+                      discDisplay.innerText = `(وفرت ${discountAmount.toFixed(2)} ر.ع)`;
+                      discDisplay.classList.remove('hidden');
+                  } else { discDisplay.classList.add('hidden'); }
+              }
+
+              let finalDiscountAmount = appliedFreePiece ? (currentProduct.BasePrice + fabricExtra) : (totalPrice * (appliedDiscount / 100));
+              return { totalQty, totalPrice: Math.max(0, totalPrice - finalDiscountAmount) };
+          }
 
         function submitOrderProcess() {
             const btn = document.getElementById('submit-btn');

@@ -66,7 +66,7 @@ namespace MaestroSport.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ValidateCoupon(string code)
+        public async Task<IActionResult> ValidateCoupon(string code, int totalQty, int categoryId, string fabricName)
         {
             try
             {
@@ -77,17 +77,26 @@ namespace MaestroSport.Controllers
 
                 if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate >= DateTime.Now))
                 {
-                    // إذا كان الكوبون يمنح قطعة مجانية
-                    if (coupon.IsFreePiece)
-                    {
-                        return Json(new { valid = true, isFreePiece = true });
-                    }
+                    // 1. فحص الحد الأدنى
+                    if (coupon.MinQuantity > 0 && totalQty < coupon.MinQuantity)
+                        return Json(new { valid = false, message = $"يتطلب طلب {coupon.MinQuantity} قطع لتفعيل الكود." });
 
-                    // إذا كان الكوبون نسبة خصم عادية
+                    // 2. فحص القسم المخصص
+                    if (coupon.TargetCategoryId.HasValue && coupon.TargetCategoryId.Value != categoryId)
+                        return Json(new { valid = false, message = "هذا الكود غير مخصص لموديلات هذا القسم." });
+
+                    // 3. فحص القماش المخصص
+                    if (!string.IsNullOrEmpty(coupon.TargetFabricName) && coupon.TargetFabricName != fabricName)
+                        return Json(new { valid = false, message = $"هذا الكود مخصص فقط إذا اخترت قماش ({coupon.TargetFabricName})." });
+
+                    // إذا اجتاز كل الشروط بنجاح
+                    if (coupon.IsFreePiece)
+                        return Json(new { valid = true, isFreePiece = true });
+
                     return Json(new { valid = true, discountPercentage = coupon.DiscountPercentage, isFreePiece = false });
                 }
 
-                return Json(new { valid = false, message = "الكود المدخل غير صحيح أو تم استخدامه مسبقاً." });
+                return Json(new { valid = false, message = "الكود المدخل غير صحيح أو منتهي." });
             }
             catch (Exception) { return Json(new { valid = false, message = "حدث خطأ أثناء التحقق." }); }
         }
@@ -121,19 +130,15 @@ namespace MaestroSport.Controllers
                     else return Json(new { success = false, message = $"عذراً، السعة الإنتاجية المتبقية لهذا اليوم هي {capacityLeft} قطعة فقط." });
                 }
 
-                // ==========================================
-                // 1. توليد كود الهدية آلياً إذا كان العدد >= 10
-                // ==========================================
+                // إنشاء كود هدية إذا طلب 10 فأكثر
                 string generatedGiftCode = null;
                 if (requestedQty >= 10)
                 {
-                    // مثال للكود: GIFT-A8B2
                     generatedGiftCode = "GIFT-" + Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
                     _context.Coupons.Add(new Coupon
                     {
                         Code = generatedGiftCode,
                         IsFreePiece = true,
-                        DiscountPercentage = 0,
                         IsActive = true
                     });
                 }
@@ -181,27 +186,30 @@ namespace MaestroSport.Controllers
                     totalAmount += (2 * totalQty);
                 }
 
-                // ==========================================
-                // 2. تطبيق الكوبون الحالي (سواء هدية أو نسبة)
-                // ==========================================
+                // تطبيق الكوبون بشروطه الجديدة في الباك إند
                 if (!string.IsNullOrEmpty(request.CouponCode))
                 {
                     var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == request.CouponCode && c.IsActive);
                     if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate >= DateTime.Now))
                     {
-                        if (coupon.IsFreePiece)
-                        {
-                            // خصم قيمة قطعة واحدة شاملة القماش
-                            decimal freePieceValue = product.BasePrice + request.FabricExtraPrice;
-                            totalAmount -= freePieceValue;
+                        bool isValid = true;
+                        if (coupon.MinQuantity > 0 && totalQty < coupon.MinQuantity) isValid = false;
+                        if (coupon.TargetCategoryId.HasValue && coupon.TargetCategoryId.Value != product.CategoryId) isValid = false;
+                        if (!string.IsNullOrEmpty(coupon.TargetFabricName) && coupon.TargetFabricName != request.FabricType) isValid = false;
 
-                            // تعطيل كود الهدية لكي يستخدم لمرة واحدة فقط
-                            coupon.IsActive = false;
-                        }
-                        else
+                        if (isValid)
                         {
-                            decimal discountAmount = totalAmount * (coupon.DiscountPercentage / 100);
-                            totalAmount -= discountAmount;
+                            if (coupon.IsFreePiece)
+                            {
+                                decimal freePieceValue = product.BasePrice + request.FabricExtraPrice;
+                                totalAmount -= freePieceValue;
+                                coupon.IsActive = false; // تعطيل الكود لأنه استخدم
+                            }
+                            else
+                            {
+                                decimal discountAmount = totalAmount * (coupon.DiscountPercentage / 100);
+                                totalAmount -= discountAmount;
+                            }
                         }
                     }
                 }
@@ -216,7 +224,7 @@ namespace MaestroSport.Controllers
                     orderId = order.Id,
                     totalPrice = order.TotalAmount,
                     deliveryDate = order.ExpectedDeliveryDate.ToString("yyyy/MM/dd"),
-                    giftCode = generatedGiftCode // إرسال الكود للواجهة لعرضه للزبون
+                    giftCode = generatedGiftCode
                 });
             }
             catch (Exception ex)

@@ -20,7 +20,16 @@ namespace MaestroSport.Models
         [Display(Name = "هل هو كود قطعة مجانية؟")]
         public bool IsFreePiece { get; set; } = false;
 
-        [Display(Name = "تاريخ الانتهاء")]
+        [Display(Name = "الحد الأدنى للقطع (اختياري)")]
+        public int MinQuantity { get; set; } = 0; 
+
+        [Display(Name = "مخصص لقسم محدد (اختياري)")]
+        public int? TargetCategoryId { get; set; }
+
+        [Display(Name = "مخصص لقماش محدد (اختياري)")]
+        public string? TargetFabricName { get; set; }
+
+        [Display(Name = "تاريخ الانتهاء (اختياري)")]
         public DateTime? ExpiryDate { get; set; }
 
         [Display(Name = "نشط")]
