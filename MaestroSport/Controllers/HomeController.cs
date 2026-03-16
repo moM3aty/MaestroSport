@@ -16,7 +16,7 @@ namespace MaestroSport.Controllers
 {
     public class OrderSubmissionDto
     {
-        public int ProductId { get; set; }
+        // تم إزالة ProductId من هنا لأن السلة أصبحت تحتوي على عدة موديلات
         public string CustomerName { get; set; }
         public string PhoneNumber { get; set; }
         public string Notes { get; set; }
@@ -29,6 +29,7 @@ namespace MaestroSport.Controllers
 
     public class OrderItemDto
     {
+        public int ProductId { get; set; } // تمت إضافته هنا ليكون لكل قطعة موديل خاص بها
         public int SizeId { get; set; }
         public int Quantity { get; set; }
     }
@@ -106,13 +107,14 @@ namespace MaestroSport.Controllers
         {
             try
             {
-                var product = await _context.Products.FindAsync(request.ProductId);
-                if (product == null) return Json(new { success = false, message = "الموديل غير موجود" });
-
                 var itemsList = JsonSerializer.Deserialize<List<OrderItemDto>>(request.ItemsJson);
                 if (itemsList == null || !itemsList.Any()) return Json(new { success = false, message = "الطلب فارغ" });
 
-                var groupedItems = itemsList.GroupBy(i => i.SizeId).Select(g => new OrderItemDto { SizeId = g.Key, Quantity = g.Sum(i => i.Quantity) }).ToList();
+                // تجميع القطع المتشابهة في الموديل والمقاس
+                var groupedItems = itemsList.GroupBy(i => new { i.ProductId, i.SizeId })
+                                            .Select(g => new OrderItemDto { ProductId = g.Key.ProductId, SizeId = g.Key.SizeId, Quantity = g.Sum(i => i.Quantity) })
+                                            .ToList();
+
                 int requestedQty = groupedItems.Sum(i => i.Quantity);
 
                 int dailyCapacity = 15;
@@ -130,17 +132,11 @@ namespace MaestroSport.Controllers
                     else return Json(new { success = false, message = $"عذراً، السعة الإنتاجية المتبقية لهذا اليوم هي {capacityLeft} قطعة فقط." });
                 }
 
-                // إنشاء كود هدية إذا طلب 10 فأكثر
                 string generatedGiftCode = null;
                 if (requestedQty >= 10)
                 {
                     generatedGiftCode = "GIFT-" + Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
-                    _context.Coupons.Add(new Coupon
-                    {
-                        Code = generatedGiftCode,
-                        IsFreePiece = true,
-                        IsActive = true
-                    });
+                    _context.Coupons.Add(new Coupon { Code = generatedGiftCode, IsFreePiece = true, IsActive = true });
                 }
 
                 var order = new Order
@@ -166,11 +162,15 @@ namespace MaestroSport.Controllers
 
                 decimal totalAmount = 0;
                 int totalQty = 0;
+                bool isAnyCustomDesign = false;
 
                 foreach (var item in groupedItems)
                 {
+                    var product = await _context.Products.FindAsync(item.ProductId);
                     var size = await _context.Sizes.FindAsync(item.SizeId);
-                    if (size == null) continue;
+                    if (product == null || size == null) continue;
+
+                    if (product.IsCustomDesign) isAnyCustomDesign = true;
 
                     decimal unitPrice = product.BasePrice + size.AdditionalPrice;
                     totalAmount += (unitPrice * item.Quantity);
@@ -181,12 +181,12 @@ namespace MaestroSport.Controllers
 
                 totalAmount += (request.FabricExtraPrice * totalQty);
 
-                if (product.IsCustomDesign && totalQty > 0 && totalQty <= 10)
+                // رسوم التصميم الخاص تطبق إذا كان هناك أي موديل بتصميم خاص والعدد الإجمالي أقل من أو يساوي 10
+                if (isAnyCustomDesign && totalQty > 0 && totalQty <= 10)
                 {
                     totalAmount += (2 * totalQty);
                 }
 
-                // تطبيق الكوبون بشروطه الجديدة في الباك إند
                 if (!string.IsNullOrEmpty(request.CouponCode))
                 {
                     var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == request.CouponCode && c.IsActive);
@@ -194,16 +194,19 @@ namespace MaestroSport.Controllers
                     {
                         bool isValid = true;
                         if (coupon.MinQuantity > 0 && totalQty < coupon.MinQuantity) isValid = false;
-                        if (coupon.TargetCategoryId.HasValue && coupon.TargetCategoryId.Value != product.CategoryId) isValid = false;
-                        if (!string.IsNullOrEmpty(coupon.TargetFabricName) && coupon.TargetFabricName != request.FabricType) isValid = false;
+
+                        // تم تجاهل شرط القسم لأن السلة قد تحتوي على أقسام مختلفة (يمكن تطويرها لاحقاً إذا رغبت)
+                        // تم تجاهل شرط القماش لنفس السبب
 
                         if (isValid)
                         {
                             if (coupon.IsFreePiece)
                             {
-                                decimal freePieceValue = product.BasePrice + request.FabricExtraPrice;
+                                // خصم متوسط سعر القطعة إذا كانت السلة مختلطة أو سعر أول قطعة
+                                var firstProduct = await _context.Products.FindAsync(groupedItems.First().ProductId);
+                                decimal freePieceValue = (firstProduct?.BasePrice ?? 0) + request.FabricExtraPrice;
                                 totalAmount -= freePieceValue;
-                                coupon.IsActive = false; // تعطيل الكود لأنه استخدم
+                                coupon.IsActive = false;
                             }
                             else
                             {

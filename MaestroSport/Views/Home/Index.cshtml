@@ -11,11 +11,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="~/images/logo.png" rel="icon" type="image/x-icon" />
-    
+
     <style>
         /* ==========================================================================
-                   ULTRA PREMIUM DESIGN SYSTEM
-                   ========================================================================== */
+                           ULTRA PREMIUM DESIGN SYSTEM
+                           ========================================================================== */
         :root {
             --gold: #D4AF37;
             --gold-light: #F3E5AB;
@@ -138,6 +138,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            padding-bottom: 80px; /* Space for fab */
         }
 
         .container {
@@ -240,9 +241,8 @@
         }
 
         .hero-banner-img {
-            
             height: 100%;
-            margin:auto;
+            margin: auto;
             display: block;
         }
 
@@ -1133,6 +1133,45 @@
             .whatsapp-float i {
                 font-size: 1.6rem;
             }
+
+        .cart-float-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--gold-gradient);
+            color: #000 !important;
+            border-radius: 50px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+            z-index: 998;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+            display: none;
+        }
+
+            .cart-float-btn:hover, .cart-float-btn:active {
+                transform: translateY(-5px) scale(1.05);
+                box-shadow: 0 15px 30px rgba(212, 175, 55, 0.6);
+            }
+
+        .cart-badge-counter {
+            background: #ff4757;
+            color: #fff;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 0.9rem;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
@@ -1321,27 +1360,63 @@
                 </div>
             </div>
         </footer>
+        <div id="product-modal" class="modal-overlay">
+            <div class="modal-content" style="max-height: 80vh;">
+                <div class="modal-header-sticky">
+                    <div class="modal-drag-handle"></div>
+                    <div class="modal-header-content">
+                        <h3 id="product-modal-name" class="modal-title">اختيار المقاسات</h3>
+                        <button class="close-btn" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="order-form-body">
+                    <div id="custom-design-alert" class="hidden" style="background: rgba(212,175,55,0.08); border: 1px dashed var(--gold); padding: 15px; border-radius: var(--border-radius-md); margin-bottom: 25px; display: flex; gap: 12px; align-items: center;">
+                        <i class="fas fa-gem text-gold fa-2x"></i>
+                        <div>
+                            <strong class="text-gold" style="font-size: 1.1rem;">تصميم خاص</strong><br>
+                            <span style="color:var(--text-primary); font-size:0.9rem;">يضاف 2 ر.ع لرسوم التصميم. (مجانًا للطلبات الإجمالية 11 قطعة فأكثر)</span>
+                        </div>
+                    </div>
 
-        <!-- WIZARD ORDER MODAL -->
+                    <div class="form-section">
+                        <div class="section-label"><i class="fas fa-ruler-combined"></i> تحديد المقاسات</div>
+                        <div id="size-options-grid" class="size-selector-grid"></div>
+
+                        <div class="add-action-row">
+                            <div class="qty-control-modern">
+                                <button type="button" class="qty-btn-modern" onclick="changeQty(-1)"><i class="fas fa-minus"></i></button>
+                                <input type="number" id="selected-qty" class="qty-input-modern" value="1" readonly>
+                                <button type="button" class="qty-btn-modern" onclick="changeQty(1)"><i class="fas fa-plus"></i></button>
+                            </div>
+                            <button type="button" class="btn-add-cart" onclick="addSizeToCart()">
+                                أضف للسلة <i class="fas fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==============================================
+             MODAL 2: CHECKOUT WIZARD (إتمام الطلب)
+             ============================================== -->
         <div id="order-modal" class="modal-overlay">
             <div class="modal-content">
                 <div class="modal-header-sticky">
                     <div class="modal-drag-handle"></div>
                     <div class="modal-header-content">
-                        <h3 id="modal-item-name" class="modal-title">تفاصيل الطلب</h3>
-                        <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+                        <h3 class="modal-title">إتمام الطلب</h3>
+                        <button class="close-btn" onclick="closeCheckoutModal()"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
 
                 <div class="order-form-body">
                     <div id="step-1-details" class="step-view active">
-                        <div id="custom-design-alert" class="hidden" style="background: rgba(212,175,55,0.08); border: 1px dashed var(--gold); padding: 15px; border-radius: var(--border-radius-md); margin-bottom: 25px; display: flex; gap: 12px; align-items: center;">
-                            <i class="fas fa-gem text-gold fa-2x"></i>
-                            <div>
-                                <strong class="text-gold" style="font-size: 1.1rem;">تصميم خاص</strong><br>
-                                <span style="color:var(--text-primary); font-size:0.9rem;">يضاف 2 ر.ع لرسوم التصميم للقطعة.</span><br>
-                                <span style="color:var(--text-secondary); font-size:0.8rem;">(مجانًا للطلبات من 11 قطعة فأكثر)</span>
-                            </div>
+
+                        <!-- سلة المشتريات المجمعة -->
+                        <div class="form-section">
+                            <div class="section-label"><i class="fas fa-shopping-bag"></i> محتويات السلة</div>
+                            <div id="global-cart-list" class="cart-container"></div>
                         </div>
 
                         <div class="form-section">
@@ -1350,44 +1425,26 @@
                             <input type="tel" id="customer-phone" class="input-modern" placeholder="رقم الهاتف للتواصل (مثال: 90000000)">
                         </div>
 
-                        <div class="form-section">
-                            <div class="section-label"><i class="fas fa-ruler-combined"></i> تحديد المقاسات</div>
-                            <div id="size-options-grid" class="size-selector-grid"></div>
-
-                            <div class="add-action-row">
-                                <div class="qty-control-modern">
-                                    <button type="button" class="qty-btn-modern" onclick="changeQty(-1)"><i class="fas fa-minus"></i></button>
-                                    <input type="number" id="selected-qty" class="qty-input-modern" value="1" readonly>
-                                    <button type="button" class="qty-btn-modern" onclick="changeQty(1)"><i class="fas fa-plus"></i></button>
-                                </div>
-                                <button type="button" class="btn-add-cart" onclick="addSizeToSelection()">
-                                    إضافة <i class="fas fa-cart-plus"></i>
-                                </button>
-                            </div>
-
-                            <div id="selected-sizes-list" class="cart-container hidden"></div>
-                        </div>
-
-                        <div id="custom-image-section" class="form-section hidden">
-                            <div class="section-label"><i class="fas fa-cloud-upload-alt"></i> إرفاق التصميم أو الشعار (اختياري)</div>
+                        <div id="custom-image-section" class="form-section">
+                            <div class="section-label"><i class="fas fa-cloud-upload-alt"></i> إرفاق التصميم أو الشعار للطلب (اختياري)</div>
                             <div class="file-upload-wrapper">
                                 <input type="file" id="custom-image-input" accept="image/*" class="file-upload-input">
                             </div>
                         </div>
 
                         <div class="form-section">
-                            <div class="section-label"><i class="fas fa-layer-group"></i> اختيار القماش</div>
+                            <div class="section-label"><i class="fas fa-layer-group"></i> اختيار القماش (يطبق على كل الطلب)</div>
                             <select id="fabric-select" class="input-modern" onchange="calculateLiveTotal()"></select>
                         </div>
 
                         <div class="form-section">
-                            <div class="section-label"><i class="fas fa-pen-nib"></i> تفاصيل إضافية</div>
-                            <textarea id="order-notes" class="input-modern" rows="3" placeholder="اكتب الأسماء، الأرقام المطلوبة على الظهر، أو أي ملاحظات..."></textarea>
+                            <div class="section-label"><i class="fas fa-pen-nib"></i> تفاصيل إضافية للطلب بالكامل</div>
+                            <textarea id="order-notes" class="input-modern" rows="3" placeholder="اكتب الأسماء، الأرقام المطلوبة، أو حدد ملاحظات لكل موديل..."></textarea>
                         </div>
 
                         <div class="form-section" style="display: flex; gap: 10px;">
                             <input type="text" id="coupon-input" class="input-modern" placeholder="لديك كود خصم؟">
-                            <button type="button" onclick="applyCouponLogic()" style="background:var(--bg-surface-elevated); border:1px solid var(--gold); color:var(--gold); border-radius:var(--border-radius-md); padding:0 25px; font-weight:900; cursor:pointer; transition: 0.3s;">تطبيق</button>
+                            <button type="button" onclick="calculateLiveTotal(true)" style="background:var(--bg-surface-elevated); border:1px solid var(--gold); color:var(--gold); border-radius:var(--border-radius-md); padding:0 25px; font-weight:900; cursor:pointer; transition: 0.3s;">تطبيق</button>
                         </div>
                     </div>
 
@@ -1400,10 +1457,6 @@
 
                         <div class="summary-card">
                             <h4 style="color:var(--gold); margin-bottom:15px; border-bottom:1px solid var(--border-subtle); padding-bottom:10px;">مراجعة الطلب</h4>
-                            <div class="summary-row">
-                                <span style="color:var(--text-secondary);">الموديل:</span>
-                                <span id="summary-model-name" style="font-weight:bold;">---</span>
-                            </div>
                             <div class="summary-row">
                                 <span style="color:var(--text-secondary);">إجمالي القطع:</span>
                                 <span id="summary-total-qty" style="font-weight:bold;">0 قطعة</span>
@@ -1433,7 +1486,7 @@
                             </div>
                         </div>
                         <button class="btn-wizard" onclick="goToStep2()">
-                            مواصلة <i class="fas fa-arrow-left"></i>
+                            مواصلة الدفع <i class="fas fa-arrow-left"></i>
                         </button>
                     </div>
 
@@ -1442,7 +1495,7 @@
                             تأكيد الدفع والطلب <i class="fas fa-credit-card"></i>
                         </button>
                         <button class="btn-wizard-outline" onclick="goToStep1()">
-                            تعديل الطلب <i class="fas fa-pen"></i>
+                            رجوع للتعديل <i class="fas fa-pen"></i>
                         </button>
                     </div>
                 </div>
@@ -1454,6 +1507,12 @@
             <span>للاستفسار</span>
         </a>
 
+        <!-- زر السلة العائم -->
+        <div id="cart-float-btn" class="cart-float-btn" onclick="openCheckoutModal()">
+            <i class="fas fa-shopping-cart"></i> السلة
+            <span id="cart-badge-counter" class="cart-badge-counter">0</span>
+        </div>
+
     </main>
 
     <script>
@@ -1462,13 +1521,15 @@
         const fabricsData = @Html.Raw(ViewBag.FabricsJson ?? "[]");
         const promoBannerUrl = '@Html.Raw(ViewBag.PromoBannerUrl ?? "")';
 
-        let currentProduct = null;
-        let appliedDiscount = 0;
-        let activeCouponCode = "";
-        let appliedFreePiece = false;
-        let currentSelectedSizeId = null;
-        let orderItems = [];
         let allProducts = [];
+        let globalCart = []; // السلة الشاملة
+        let currentModalProduct = null;
+        let currentSelectedSizeId = null;
+
+        // متغيرات الكوبون
+        let activeCouponCode = "";
+        let appliedDiscountPercent = 0;
+        let appliedFreePiece = false;
 
         window.onload = () => {
             initPromoBanner();
@@ -1482,6 +1543,7 @@
             renderCategoriesGrid();
             renderFabrics();
             toggleView('home');
+            updateCartBadge();
         };
 
         function initPromoBanner() {
@@ -1557,7 +1619,7 @@
                 noResults.style.display = 'none';
                 filtered.forEach(item => {
                     resultsList.innerHTML += `
-                        <div class="product-card product-item-card" onclick="openOrderModal(${item.Id})">
+                        <div class="product-card product-item-card" onclick="openProductModal(${item.Id})">
                             <div class="product-img-container">
                                 ${item.IsCustomDesign ? '<div class="badge-custom"><i class="fas fa-crown"></i> خاص</div>' : ''}
                                 <img src="/${item.ImageUrl}" onerror="this.src='https://placehold.co/400x500/1e1e1e/D4AF37?text=Maestro'">
@@ -1595,7 +1657,7 @@
                 noResults.style.display = 'none';
                 cat.Products.forEach(item => {
                     list.innerHTML += `
-                        <div class="product-card product-item-card" onclick="openOrderModal(${item.Id})">
+                        <div class="product-card product-item-card" onclick="openProductModal(${item.Id})">
                             <div class="product-img-container">
                                 ${item.IsCustomDesign ? '<div class="badge-custom"><i class="fas fa-crown"></i> خاص</div>' : ''}
                                 <img src="/${item.ImageUrl}" onerror="this.src='https://placehold.co/400x500/1e1e1e/D4AF37?text=Maestro'">
@@ -1624,79 +1686,32 @@
             return `${yyyy}/${mm}/${dd}`;
         }
 
-        function openOrderModal(productId) {
-            currentProduct = allProducts.find(p => p.Id === productId);
-            if (!currentProduct) return;
+        // ==========================================
+        // Modal & Cart Logic
+        // ==========================================
 
-            document.getElementById('modal-item-name').innerText = currentProduct.Name;
-            document.getElementById('custom-design-alert').classList.toggle('hidden', !currentProduct.IsCustomDesign);
-            document.getElementById('custom-image-section').classList.toggle('hidden', !currentProduct.IsCustomDesign);
+        function openProductModal(productId) {
+            currentModalProduct = allProducts.find(p => p.Id === productId);
+            if (!currentModalProduct) return;
 
-            orderItems = [];
+            document.getElementById('product-modal-name').innerText = currentModalProduct.Name;
+            document.getElementById('custom-design-alert').classList.toggle('hidden', !currentModalProduct.IsCustomDesign);
+
             currentSelectedSizeId = null;
-            appliedDiscount = 0;
-            appliedFreePiece = false;
-            activeCouponCode = "";
             document.getElementById('selected-qty').value = 1;
-            document.getElementById('custom-image-input').value = "";
-            document.getElementById('order-notes').value = "";
-            document.getElementById('fabric-select').value = "0";
-            document.getElementById('coupon-input').value = "";
-            document.getElementById('discount-display').classList.add('hidden');
-
             renderSizeOptions();
-            renderSelectedSizes();
-            calculateLiveTotal();
-            goToStep1();
 
-            const overlay = document.getElementById('order-modal');
+            const overlay = document.getElementById('product-modal');
             overlay.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             setTimeout(() => overlay.classList.add('show'), 10);
         }
 
-        function closeModal() {
-            const overlay = document.getElementById('order-modal');
+        function closeProductModal() {
+            const overlay = document.getElementById('product-modal');
             overlay.classList.remove('show');
             document.body.style.overflow = '';
             setTimeout(() => overlay.classList.add('hidden'), 400);
-        }
-
-        function goToStep2() {
-            const customerName = document.getElementById('customer-name').value.trim();
-            const customerPhone = document.getElementById('customer-phone').value.trim();
-
-            if(!customerName || !customerPhone) {
-                Swal.fire({title: 'بيانات ناقصة', text: 'يرجى إدخال اسمك ورقم هاتفك لنتواصل معك.', icon: 'warning', background: '#1a1a1a', color: '#fff'});
-                return;
-            }
-
-            const { totalQty, totalPrice } = calculateLiveTotal();
-            if (totalQty === 0) {
-                Swal.fire({title: 'السلة فارغة', text: 'يرجى اختيار مقاس وكمية ثم الضغط على "إضافة".', icon: 'warning', background: '#1a1a1a', color: '#fff'});
-                return;
-            }
-
-            document.getElementById('expected-date-display').innerText = getExpectedDeliveryDate();
-            document.getElementById('summary-model-name').innerText = currentProduct.Name;
-            document.getElementById('summary-total-qty').innerText = `${totalQty} قطعة`;
-            document.getElementById('summary-total-price').innerText = totalPrice.toFixed(2);
-
-            document.getElementById('step-1-details').classList.remove('active');
-            document.getElementById('step-2-confirmation').classList.add('active');
-
-            document.getElementById('footer-step-1').classList.add('hidden');
-            document.getElementById('footer-step-2').classList.remove('hidden');
-
-            document.querySelector('.modal-content').scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function goToStep1() {
-            document.getElementById('step-2-confirmation').classList.remove('active');
-            document.getElementById('step-1-details').classList.add('active');
-
-            document.getElementById('footer-step-2').classList.add('hidden');
-            document.getElementById('footer-step-1').classList.remove('hidden');
         }
 
         function renderSizeOptions() {
@@ -1726,124 +1741,202 @@
             input.value = val < 1 ? 1 : val;
         }
 
-        function addSizeToSelection() {
+        function addSizeToCart() {
             if(!currentSelectedSizeId) { toast("يرجى اختيار المقاس", "warning"); return; }
             const qty = parseInt(document.getElementById('selected-qty').value);
             const sizeObj = sizesData.find(s => s.Id === currentSelectedSizeId);
 
-            const existing = orderItems.find(i => i.SizeId === currentSelectedSizeId);
-            if(existing) existing.Quantity += qty;
-            else orderItems.push({ SizeId: sizeObj.Id, SizeName: sizeObj.Name, ExtraPrice: parseFloat(sizeObj.AdditionalPrice) || 0, Quantity: qty });
+            const existing = globalCart.find(i => i.ProductId === currentModalProduct.Id && i.SizeId === currentSelectedSizeId);
 
-            document.getElementById('selected-qty').value = 1;
-            renderSelectedSizes();
-            calculateLiveTotal();
-            toast("تمت الإضافة للسلة بنجاح");
+            if(existing) {
+                existing.Quantity += qty;
+            } else {
+                globalCart.push({
+                    ProductId: currentModalProduct.Id,
+                    ProductName: currentModalProduct.Name,
+                    ProductImage: currentModalProduct.ImageUrl,
+                    BasePrice: currentModalProduct.BasePrice,
+                    IsCustomDesign: currentModalProduct.IsCustomDesign,
+                    CategoryId: currentModalProduct.CategoryId,
+                    SizeId: sizeObj.Id,
+                    SizeName: sizeObj.Name,
+                    ExtraPrice: parseFloat(sizeObj.AdditionalPrice) || 0,
+                    Quantity: qty
+                });
+            }
+
+            updateCartBadge();
+            closeProductModal();
+            toast("تمت الإضافة للسلة بنجاح 🛒");
         }
 
-        function removeSizeFromSelection(index) {
-            orderItems.splice(index, 1);
-            renderSelectedSizes();
-            calculateLiveTotal();
+        function updateCartBadge() {
+            let count = globalCart.reduce((sum, item) => sum + item.Quantity, 0);
+            document.getElementById('cart-badge-counter').innerText = count;
+
+            const floatBtn = document.getElementById('cart-float-btn');
+            if(count > 0) floatBtn.style.display = 'flex';
+            else floatBtn.style.display = 'none';
         }
 
-        function renderSelectedSizes() {
-            const container = document.getElementById('selected-sizes-list');
-            if(orderItems.length === 0) {
-                container.classList.add('hidden');
-                container.innerHTML = '';
+        function openCheckoutModal() {
+            if(globalCart.length === 0) {
+                toast("السلة فارغة", "warning");
                 return;
             }
 
-            container.classList.remove('hidden');
+            // تهيئة شاشة الدفع
+            document.getElementById('expected-date-display').innerText = getExpectedDeliveryDate();
+            renderCartItems();
+            calculateLiveTotal();
+            goToStep1();
+
+            const overlay = document.getElementById('order-modal');
+            overlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => overlay.classList.add('show'), 10);
+        }
+
+        function closeCheckoutModal() {
+            const overlay = document.getElementById('order-modal');
+            overlay.classList.remove('show');
+            document.body.style.overflow = '';
+            setTimeout(() => overlay.classList.add('hidden'), 400);
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('global-cart-list');
             container.innerHTML = "";
-            orderItems.forEach((item, index) => {
+            globalCart.forEach((item, index) => {
                 container.innerHTML += `
-                    <div class="cart-item-modern">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <span class="cart-item-size">${item.SizeName}</span>
-                            <span style="color: var(--text-secondary); font-size: 0.95rem;">الكمية: <b style="color:#fff;">${item.Quantity}</b></span>
+                    <div class="cart-item-modern" style="background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--accent);">
+                        <img src="/${item.ProductImage}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-left: 10px;" onerror="this.src='https://placehold.co/100/111/D4AF37?text=M'" />
+                        <div style="flex-grow: 1;">
+                            <h4 style="margin: 0; color: var(--gold); font-size: 1rem;">${item.ProductName}</h4>
+                            <div style="display: flex; align-items: center; gap: 15px; margin-top: 5px;">
+                                <span class="cart-item-size">${item.SizeName}</span>
+                                <span style="color: var(--text-secondary); font-size: 0.95rem;">الكمية: <b style="color:#fff;">${item.Quantity}</b></span>
+                            </div>
                         </div>
-                        <button type="button" class="btn-del-cart" onclick="removeSizeFromSelection(${index})"><i class="fas fa-trash-alt"></i></button>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                            <span style="color: #fff; font-weight: bold;">${(item.BasePrice + item.ExtraPrice) * item.Quantity} ر.ع</span>
+                            <button type="button" class="btn-del-cart" onclick="removeSizeFromCart(${index})" style="width: 25px; height: 25px;"><i class="fas fa-trash-alt" style="font-size: 0.8rem;"></i></button>
+                        </div>
                     </div>`;
             });
         }
 
-        function applyCouponLogic() { calculateLiveTotal(true); }
+        function removeSizeFromCart(index) {
+            globalCart.splice(index, 1);
+            updateCartBadge();
+            if(globalCart.length === 0) {
+                closeCheckoutModal();
+            } else {
+                renderCartItems();
+                calculateLiveTotal();
+            }
+        }
 
-          function calculateLiveTotal(isCouponClick = false) {
-              let totalQty = 0; let totalPrice = 0;
-              if (!currentProduct) return { totalQty, totalPrice };
+        function calculateLiveTotal(isCouponClick = false) {
+            let totalQty = 0; let totalPrice = 0;
+            let hasCustomDesign = false;
+            let firstProductBasePrice = globalCart.length > 0 ? globalCart[0].BasePrice : 0;
+            let firstCategoryId = globalCart.length > 0 ? globalCart[0].CategoryId : null;
 
-              const fabricSelect = document.getElementById('fabric-select');
-              const fabricExtra = parseFloat(fabricSelect.value) || 0;
+            const fabricSelect = document.getElementById('fabric-select');
+            const fabricExtra = parseFloat(fabricSelect.value) || 0;
+            const currentFabricName = fabricSelect.options[fabricSelect.selectedIndex]?.getAttribute('data-name') || "";
 
-              // جلب اسم القماش ورقم القسم للتحقق من شروط الكوبون
-              const currentFabricName = fabricSelect.options[fabricSelect.selectedIndex].getAttribute('data-name');
-              const currentCategoryId = currentProduct.CategoryId;
+            globalCart.forEach(item => {
+                totalQty += item.Quantity;
+                totalPrice += item.Quantity * (item.BasePrice + item.ExtraPrice + fabricExtra);
+                if (item.IsCustomDesign) hasCustomDesign = true;
+            });
 
-              orderItems.forEach(item => {
-                  totalQty += item.Quantity;
-                  totalPrice += item.Quantity * (currentProduct.BasePrice + item.ExtraPrice + fabricExtra);
-              });
+            if (hasCustomDesign && totalQty > 0 && totalQty <= 10) totalPrice += (2 * totalQty);
 
-              if (currentProduct.IsCustomDesign && totalQty > 0 && totalQty <= 10) totalPrice += (2 * totalQty);
+            if (isCouponClick) {
+                const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+                if (!code) { toast('يرجى إدخال الكود أولاً', 'warning'); return; }
 
-              if (isCouponClick) {
-                  const code = document.getElementById('coupon-input').value.trim().toUpperCase();
-                  if (!code) { toast('يرجى إدخال الكود أولاً', 'warning'); return; }
+                const url = `/Home/ValidateCoupon?code=${encodeURIComponent(code)}&totalQty=${totalQty}&categoryId=${firstCategoryId || ''}&fabricName=${encodeURIComponent(currentFabricName)}`;
 
-                  // تمرير المعطيات الجديدة للكنترولر
-                  const url = `/Home/ValidateCoupon?code=${encodeURIComponent(code)}&totalQty=${totalQty}&categoryId=${currentCategoryId}&fabricName=${encodeURIComponent(currentFabricName)}`;
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.valid) {
+                            if(data.isFreePiece) {
+                                appliedFreePiece = true;
+                                appliedDiscountPercent = 0;
+                                activeCouponCode = code;
+                                toast(`تم تفعيل الكوبون: ستحصل على قطعة مجانية! 🎁`);
+                            } else {
+                                appliedFreePiece = false;
+                                appliedDiscountPercent = data.discountPercentage;
+                                activeCouponCode = code;
+                                toast(`تم تفعيل الخصم: ${data.discountPercentage}%`);
+                            }
+                        }
+                        else {
+                            appliedDiscountPercent = 0;
+                            appliedFreePiece = false;
+                            activeCouponCode = "";
+                            document.getElementById('coupon-input').value = "";
+                            toast(data.message || 'الكود غير صحيح', 'error');
+                        }
+                        updateDisplay();
+                    }).catch(() => toast('خطأ في الاتصال بالسيرفر', 'error'));
+            } else { updateDisplay(); }
 
-                  fetch(url)
-                      .then(res => res.json())
-                      .then(data => {
-                          if (data.valid) {
-                              if(data.isFreePiece) {
-                                  appliedFreePiece = true;
-                                  appliedDiscount = 0;
-                                  activeCouponCode = code;
-                                  toast(`تم تفعيل الكوبون: ستحصل على قطعة مجانية! 🎁`);
-                              } else {
-                                  appliedFreePiece = false;
-                                  appliedDiscount = data.discountPercentage;
-                                  activeCouponCode = code;
-                                  toast(`تم تفعيل الخصم: ${data.discountPercentage}%`);
-                              }
-                          }
-                          else {
-                              appliedDiscount = 0;
-                              appliedFreePiece = false;
-                              activeCouponCode = "";
-                              document.getElementById('coupon-input').value = "";
-                              toast(data.message || 'الكود غير صحيح', 'error');
-                          }
-                          updateDisplay();
-                      }).catch(() => toast('خطأ في الاتصال بالسيرفر', 'error'));
-              } else { updateDisplay(); }
+            function updateDisplay() {
+                let discountAmount = 0;
+                if (appliedFreePiece && totalQty > 0) {
+                    discountAmount = firstProductBasePrice + fabricExtra;
+                } else {
+                    discountAmount = totalPrice * (appliedDiscountPercent / 100);
+                }
 
-              function updateDisplay() {
-                  let discountAmount = 0;
-                  if (appliedFreePiece && totalQty > 0) {
-                      discountAmount = currentProduct.BasePrice + fabricExtra;
-                  } else {
-                      discountAmount = totalPrice * (appliedDiscount / 100);
-                  }
+                let final = Math.max(0, totalPrice - discountAmount);
+                document.getElementById('total-price-display').innerText = final.toFixed(2);
+                document.getElementById('summary-total-price').innerText = final.toFixed(2);
+                document.getElementById('summary-total-qty').innerText = `${totalQty} قطعة`;
 
-                  let final = Math.max(0, totalPrice - discountAmount);
-                  document.getElementById('total-price-display').innerText = final.toFixed(2);
+                const discDisplay = document.getElementById('discount-display');
+                if (discountAmount > 0 && totalQty > 0) {
+                    discDisplay.innerText = `(وفرت ${discountAmount.toFixed(2)} ر.ع)`;
+                    discDisplay.classList.remove('hidden');
+                } else { discDisplay.classList.add('hidden'); }
+            }
 
-                  const discDisplay = document.getElementById('discount-display');
-                  if (discountAmount > 0 && totalQty > 0) {
-                      discDisplay.innerText = `(وفرت ${discountAmount.toFixed(2)} ر.ع)`;
-                      discDisplay.classList.remove('hidden');
-                  } else { discDisplay.classList.add('hidden'); }
-              }
+            let finalDiscountAmount = appliedFreePiece ? (firstProductBasePrice + fabricExtra) : (totalPrice * (appliedDiscountPercent / 100));
+            return { totalQty, totalPrice: Math.max(0, totalPrice - finalDiscountAmount) };
+        }
 
-              let finalDiscountAmount = appliedFreePiece ? (currentProduct.BasePrice + fabricExtra) : (totalPrice * (appliedDiscount / 100));
-              return { totalQty, totalPrice: Math.max(0, totalPrice - finalDiscountAmount) };
-          }
+        function goToStep2() {
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerPhone = document.getElementById('customer-phone').value.trim();
+
+            if(!customerName || !customerPhone) {
+                Swal.fire({title: 'بيانات ناقصة', text: 'يرجى إدخال اسمك ورقم هاتفك لنتواصل معك.', icon: 'warning', background: '#1a1a1a', color: '#fff'});
+                return;
+            }
+
+            document.getElementById('step-1-details').classList.remove('active');
+            document.getElementById('step-2-confirmation').classList.add('active');
+
+            document.getElementById('footer-step-1').classList.add('hidden');
+            document.getElementById('footer-step-2').classList.remove('hidden');
+
+            document.querySelector('.modal-content').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToStep1() {
+            document.getElementById('step-2-confirmation').classList.remove('active');
+            document.getElementById('step-1-details').classList.add('active');
+
+            document.getElementById('footer-step-2').classList.add('hidden');
+            document.getElementById('footer-step-1').classList.remove('hidden');
+        }
 
         function submitOrderProcess() {
             const btn = document.getElementById('submit-btn');
@@ -1853,12 +1946,26 @@
             const formData = new FormData();
             formData.append('CustomerName', document.getElementById('customer-name').value.trim());
             formData.append('PhoneNumber', document.getElementById('customer-phone').value.trim());
-            formData.append('ProductId', currentProduct.Id);
             formData.append('Notes', document.getElementById('order-notes').value || "");
-            formData.append('FabricType', fabricSelect.options[fabricSelect.selectedIndex].getAttribute('data-name'));
+            formData.append('FabricType', fabricSelect.options[fabricSelect.selectedIndex]?.getAttribute('data-name') || "قياسي");
             formData.append('FabricExtraPrice', parseFloat(fabricSelect.value) || 0);
             formData.append('CouponCode', activeCouponCode);
-            formData.append('ItemsJson', JSON.stringify(orderItems.map(i => ({ SizeId: i.SizeId, Quantity: i.Quantity }))));
+
+            // تجميع السلة لتتوافق مع الـ Backend
+            let groupedCart = [];
+            globalCart.forEach(item => {
+                let existingProduct = groupedCart.find(p => p.ProductId === item.ProductId);
+                if(existingProduct) {
+                    existingProduct.Sizes.push({ SizeId: item.SizeId, Quantity: item.Quantity });
+                } else {
+                    groupedCart.push({
+                        ProductId: item.ProductId,
+                        Sizes: [{ SizeId: item.SizeId, Quantity: item.Quantity }]
+                    });
+                }
+            });
+
+            formData.append('CartJson', JSON.stringify(groupedCart));
 
             const imageInput = document.getElementById('custom-image-input');
             if(imageInput && imageInput.files.length > 0) formData.append('CustomImage', imageInput.files[0]);
@@ -1867,7 +1974,9 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    closeModal();
+                    globalCart = [];
+                    updateCartBadge();
+                    closeCheckoutModal();
 
                     let giftHtml = "";
                     if (data.giftCode) {
