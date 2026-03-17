@@ -13,9 +13,6 @@
     <link href="~/images/logo.png" rel="icon" type="image/x-icon" />
 
     <style>
-        /* ==========================================================================
-                           ULTRA PREMIUM DESIGN SYSTEM
-                           ========================================================================== */
         :root {
             --gold: #D4AF37;
             --gold-light: #F3E5AB;
@@ -138,7 +135,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding-bottom: 80px; /* Space for fab */
+            padding-bottom: 80px;
         }
 
         .container {
@@ -633,7 +630,6 @@
             font-size: 0.85rem;
         }
 
-        /* Footer Links Styles */
         .footer-links {
             list-style: none;
             padding: 0;
@@ -656,7 +652,6 @@
                     padding-right: 5px;
                 }
 
-        /* Legal Pages Styling */
         .legal-content {
             background: var(--bg-surface);
             border: 1px solid var(--border-subtle);
@@ -1130,10 +1125,6 @@
                 box-shadow: 0 15px 30px rgba(37, 211, 102, 0.6);
             }
 
-            .whatsapp-float i {
-                font-size: 1.6rem;
-            }
-
         .cart-float-btn {
             position: fixed;
             bottom: 25px;
@@ -1212,7 +1203,7 @@
                         <h3 style="font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; color: #fff;">مجتمع المايسترو</h3>
                         <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 20px;">انضم إلينا لتكون أول من يرى أحدث تصاميمنا</p>
                         <a href="https://www.instagram.com/almystro_sport" target="_blank" class="insta-btn">
-                            <i class="fab fa-instagram"></i> تابعنا الآن | @@almystro_sport
+                            <i class="fab fa-instagram"></i> تابعنا الآن | @Html.Raw("@")almystro_sport
                         </a>
                     </div>
                 </div>
@@ -1360,6 +1351,8 @@
                 </div>
             </div>
         </footer>
+
+        <!-- نافذة اختيار المقاس (عند الضغط على منتج) -->
         <div id="product-modal" class="modal-overlay">
             <div class="modal-content" style="max-height: 80vh;">
                 <div class="modal-header-sticky">
@@ -1452,7 +1445,7 @@
                         <div class="delivery-mega-card">
                             <i class="fas fa-calendar-check delivery-mega-icon"></i>
                             <span class="delivery-mega-text">موعد تسليم طلبك التقريبي</span>
-                            <span class="delivery-mega-date" id="expected-date-display">---</span>
+                            <span class="delivery-mega-date" id="expected-date-display">جاري الحساب...</span>
                         </div>
 
                         <div class="summary-card">
@@ -1677,15 +1670,6 @@
             toggleView('shop');
         }
 
-        function getExpectedDeliveryDate() {
-            const date = new Date();
-            date.setDate(date.getDate() + 2);
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            return `${yyyy}/${mm}/${dd}`;
-        }
-
         // ==========================================
         // Modal & Cart Logic
         // ==========================================
@@ -1785,9 +1769,19 @@
                 return;
             }
 
-            // تهيئة شاشة الدفع
-            document.getElementById('expected-date-display').innerText = getExpectedDeliveryDate();
+            document.getElementById('expected-date-display').innerText = "جاري حساب التاريخ...";
             renderCartItems();
+
+            // جلب التاريخ الديناميكي من الباك إند
+            const totalQty = globalCart.reduce((sum, item) => sum + item.Quantity, 0);
+            fetch(`/Home/GetEstimatedDeliveryDate?requestedQty=${totalQty}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.date) {
+                        document.getElementById('expected-date-display').innerText = data.date;
+                    }
+                });
+
             calculateLiveTotal();
             goToStep1();
 
@@ -1833,6 +1827,18 @@
                 closeCheckoutModal();
             } else {
                 renderCartItems();
+
+                // تحديث التاريخ الديناميكي
+                document.getElementById('expected-date-display').innerText = "جاري الحساب...";
+                const totalQty = globalCart.reduce((sum, item) => sum + item.Quantity, 0);
+                fetch(`/Home/GetEstimatedDeliveryDate?requestedQty=${totalQty}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.date) {
+                            document.getElementById('expected-date-display').innerText = data.date;
+                        }
+                    });
+
                 calculateLiveTotal();
             }
         }

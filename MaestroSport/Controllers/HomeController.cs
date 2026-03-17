@@ -14,7 +14,6 @@ using System.Collections.Generic;
 
 namespace MaestroSport.Controllers
 {
-    // DTO لاستقبال الطلب المجمع من سلة المشتريات
     public class OrderSubmissionDto
     {
         public string CustomerName { get; set; }
@@ -23,13 +22,10 @@ namespace MaestroSport.Controllers
         public string FabricType { get; set; }
         public decimal FabricExtraPrice { get; set; }
         public string CouponCode { get; set; }
-
-        // المتغير الجديد الذي يحمل السلة بالكامل بصيغة JSON
         public string CartJson { get; set; }
         public IFormFile CustomImage { get; set; }
     }
 
-    // كلاسات مساعدة لفك تشفير السلة
     public class CartProductDto
     {
         public int ProductId { get; set; }
@@ -74,6 +70,35 @@ namespace MaestroSport.Controllers
             return View();
         }
 
+        // ==========================================
+        // دالة جديدة لحساب تاريخ التسليم الديناميكي للواجهة
+        // ==========================================
+        [HttpGet]
+        public async Task<IActionResult> GetEstimatedDeliveryDate(int requestedQty)
+        {
+            int dailyCapacity = 15;
+            var capacitySetting = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "DailyCapacity");
+            if (capacitySetting != null && int.TryParse(capacitySetting.Value, out int cap)) dailyCapacity = cap;
+
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+            var todayItemsCount = await _context.OrderItems
+                .Where(oi => oi.Order.CreatedAt >= today && oi.Order.CreatedAt < tomorrow)
+                .SumAsync(oi => (int?)oi.Quantity) ?? 0;
+
+            int totalItems = todayItemsCount + requestedQty;
+            int extraDays = 0;
+
+            // معادلة حساب الأيام الإضافية (يضيف يومين لكل سعة ممتلئة)
+            if (totalItems > 0 && dailyCapacity > 0)
+            {
+                extraDays = ((totalItems - 1) / dailyCapacity) * 2;
+            }
+
+            var deliveryDate = DateTime.Now.AddDays(2 + extraDays);
+            return Json(new { date = deliveryDate.ToString("yyyy/MM/dd") });
+        }
+
         [HttpGet]
         public async Task<IActionResult> ValidateCoupon(string code, int totalQty, int? categoryId, string fabricName)
         {
@@ -86,11 +111,9 @@ namespace MaestroSport.Controllers
 
                 if (coupon != null && (!coupon.ExpiryDate.HasValue || coupon.ExpiryDate >= DateTime.Now))
                 {
-                    // التحقق من القسم (لو تم تحديد قسم للكوبون)
                     if (categoryId.HasValue && coupon.TargetCategoryId.HasValue && coupon.TargetCategoryId.Value != categoryId.Value)
                         return Json(new { valid = false, message = "هذا الكود غير مخصص لموديلات هذا القسم." });
 
-                    // التحقق من القماش المخصص
                     if (!string.IsNullOrEmpty(coupon.TargetFabricName) && coupon.TargetFabricName != fabricName)
                         return Json(new { valid = false, message = $"هذا الكود مخصص فقط إذا اخترت قماش ({coupon.TargetFabricName})." });
 
@@ -110,7 +133,6 @@ namespace MaestroSport.Controllers
         {
             try
             {
-                // [حماية من الأخطاء] التأكد من أن السلة ليست فارغة لمنع انهيار النظام ArgumentNullException
                 if (string.IsNullOrWhiteSpace(request.CartJson))
                 {
                     return Json(new { success = false, message = "بيانات السلة مفقودة. يرجى تحديث الصفحة والمحاولة مجدداً." });
@@ -124,23 +146,30 @@ namespace MaestroSport.Controllers
 
                 int requestedQty = cartItems.SelectMany(c => c.Sizes).Sum(s => s.Quantity);
 
-                // التحقق من السعة اليومية
+                // ==========================================
+                // حساب تاريخ التسليم الديناميكي بدلاً من رفض الطلب
+                // ==========================================
                 int dailyCapacity = 15;
                 var capacitySetting = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "DailyCapacity");
                 if (capacitySetting != null && int.TryParse(capacitySetting.Value, out int cap)) dailyCapacity = cap;
 
                 var today = DateTime.Today;
                 var tomorrow = today.AddDays(1);
-                var todayItemsCount = await _context.OrderItems.Where(oi => oi.Order.CreatedAt >= today && oi.Order.CreatedAt < tomorrow).SumAsync(oi => (int?)oi.Quantity) ?? 0;
+                var todayItemsCount = await _context.OrderItems
+                    .Where(oi => oi.Order.CreatedAt >= today && oi.Order.CreatedAt < tomorrow)
+                    .SumAsync(oi => (int?)oi.Quantity) ?? 0;
 
-                if (todayItemsCount + requestedQty > dailyCapacity)
+                int totalItems = todayItemsCount + requestedQty;
+                int extraDays = 0;
+
+                if (totalItems > 0 && dailyCapacity > 0)
                 {
-                    int capacityLeft = Math.Max(0, dailyCapacity - todayItemsCount);
-                    if (capacityLeft == 0) return Json(new { success = false, message = "عذراً، اكتملت السعة الإنتاجية لطلبات اليوم. نتشرف باستقبال طلبك غداً." });
-                    else return Json(new { success = false, message = $"عذراً، السعة الإنتاجية المتبقية لهذا اليوم هي {capacityLeft} قطعة فقط." });
+                    extraDays = ((totalItems - 1) / dailyCapacity) * 2;
                 }
 
-                // إنشاء كود هدية إذا طلب 10 فأكثر
+                DateTime finalDeliveryDate = DateTime.Now.AddDays(2 + extraDays);
+                // ==========================================
+
                 string generatedGiftCode = null;
                 if (requestedQty >= 10)
                 {
@@ -156,10 +185,9 @@ namespace MaestroSport.Controllers
                     FabricType = request.FabricType,
                     FabricExtraPrice = request.FabricExtraPrice,
                     CouponCode = request.CouponCode,
-                    ExpectedDeliveryDate = DateTime.Now.AddDays(2)
+                    ExpectedDeliveryDate = finalDeliveryDate // تم وضع التاريخ المحسوب هنا
                 };
 
-                // رفع الصورة إن وجدت
                 if (request.CustomImage != null && request.CustomImage.Length > 0)
                 {
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "custom_designs");
@@ -173,7 +201,6 @@ namespace MaestroSport.Controllers
                 decimal totalAmount = 0;
                 decimal firstProductBasePrice = 0;
 
-                // الدوران على كل الموديلات في السلة
                 foreach (var cartItem in cartItems)
                 {
                     var product = await _context.Products.FindAsync(cartItem.ProductId);
@@ -203,17 +230,14 @@ namespace MaestroSport.Controllers
                         });
                     }
 
-                    // إضافة رسوم التصميم الخاص للمنتج إذا كان العدد الإجمالي في السلة أقل من 11
                     if (product.IsCustomDesign && requestedQty > 0 && requestedQty <= 10)
                     {
                         totalAmount += (2 * productQty);
                     }
                 }
 
-                // إضافة سعر القماش الإضافي للعدد الكلي
                 totalAmount += (request.FabricExtraPrice * requestedQty);
 
-                // تطبيق الكوبون في الباك إند
                 if (!string.IsNullOrEmpty(request.CouponCode))
                 {
                     var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == request.CouponCode && c.IsActive);
@@ -228,7 +252,7 @@ namespace MaestroSport.Controllers
                             {
                                 decimal freePieceValue = firstProductBasePrice + request.FabricExtraPrice;
                                 totalAmount -= freePieceValue;
-                                coupon.IsActive = false; // تعطيل الكود لأنه قطعة مجانية تُستخدم مرة واحدة
+                                coupon.IsActive = false;
                             }
                             else
                             {
