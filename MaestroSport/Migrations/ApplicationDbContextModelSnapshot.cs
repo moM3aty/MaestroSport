@@ -129,6 +129,7 @@ namespace MaestroSport.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CustomerName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ExpectedDeliveryDate")
@@ -144,8 +145,19 @@ namespace MaestroSport.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("RemainingAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Status")
                         .IsRequired()

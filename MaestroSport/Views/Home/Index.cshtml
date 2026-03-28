@@ -1163,6 +1163,34 @@
             right: -8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
+
+        /* --- Payment Options CSS --- */
+        .payment-option {
+            flex: 1;
+            background: var(--bg-surface-elevated);
+            border: 2px solid var(--border-subtle);
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+            .payment-option.active {
+                border-color: var(--gold);
+                background: rgba(212, 175, 55, 0.05);
+            }
+
+            .payment-option .check-icon {
+                color: var(--border-subtle);
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+
+            .payment-option.active .check-icon {
+                color: var(--gold);
+            }
     </style>
 </head>
 <body>
@@ -1226,14 +1254,12 @@
                 </div>
 
                 <div class="grid-layout" id="categories-render"></div>
-
                 <div id="global-products-list" class="grid-layout" style="display: none;"></div>
 
                 <div id="global-no-search-results" class="no-results" style="display: none;">
                     <i class="fas fa-search-minus fa-3x" style="opacity:0.3; margin-bottom:15px; display:block;"></i>
                     <p>عذراً، لم نجد أي موديل يطابق بحثك.</p>
                 </div>
-
             </div>
         </section>
 
@@ -1253,7 +1279,7 @@
         </section>
 
         <!-- ==============================================
-             LEGAL SCREENS (About, Terms, Privacy, Return)
+             LEGAL SCREENS
              ============================================== -->
         <section id="about-screen" class="app-screen">
             <div class="container">
@@ -1263,8 +1289,7 @@
                 </div>
                 <div class="legal-content">
                     <h3><i class="fas fa-crown"></i> المايسترو للرياضة</h3>
-                    <p>نحن علامة تجارية رائدة في سلطنة عمان متخصصة في تفصيل وخياطة الملابس الرياضية بأعلى معايير الجودة والاحترافية. نهدف إلى تقديم تصاميم مريحة وعصرية تليق بالرياضيين والفرق الرياضية.</p>
-                    <p>نجمع بين جودة الأقمشة المنتقاة بعناية ودقة التنفيذ لنضمن لك منتجاً يفوق توقعاتك. سواء كنت فرداً يبحث عن التميز أو فريقاً يطمح لتوحيد هويته الرياضية، المايسترو هو خيارك الأول.</p>
+                    <p>نحن علامة تجارية رائدة في سلطنة عمان متخصصة في تفصيل وخياطة الملابس الرياضية بأعلى معايير الجودة والاحترافية.</p>
                 </div>
             </div>
         </section>
@@ -1280,9 +1305,7 @@
                     <ul>
                         <li>يعتبر الطلب مؤكداً ونهائياً بعد إتمام عملية الدفع ووصول رسالة التأكيد.</li>
                         <li>تبدأ مدة التفصيل المحتسبة من اليوم التالي لتأكيد الدفع واستلام كافة التفاصيل.</li>
-                        <li>التصاميم الخاصة المرفقة تخضع لمراجعة الإدارة، ونحتفظ بحق رفض أي تصميم يتعارض مع القوانين والآداب العامة.</li>
-                        <li>الأسعار المعروضة قابلة للتغيير، ولكن الطلبات المؤكدة والمدفوعة لا تتأثر بأي تغيير لاحق في الأسعار.</li>
-                        <li>يرجى التأكد من اختيار المقاسات الصحيحة بدقة، حيث لا يمكن تعديل المقاس بعد بدء عملية القص والخياطة.</li>
+                        <li>لا يمكن تعديل المقاس بعد بدء عملية القص والخياطة.</li>
                     </ul>
                 </div>
             </div>
@@ -1296,12 +1319,7 @@
                 </div>
                 <div class="legal-content">
                     <h3><i class="fas fa-undo-alt"></i> سياسة الاستبدال والاسترجاع</h3>
-                    <p>نظراً لطبيعة عملنا التي تعتمد على "التفصيل الخاص" بناءً على طلب وقياسات الزبون، فإن السياسة المتبعة هي:</p>
-                    <ul>
-                        <li>لا يمكن استرجاع أو استبدال المنتجات بعد تفصيلها، نظراً لكونها صُنعت خصيصاً للمشتري.</li>
-                        <li><strong>استثناء:</strong> يحق للزبون الاستبدال أو تعديل القطعة مجاناً في حالة وجود <strong>عيب مصنعي واضح</strong> أو استلامه مقاساً/تصميماً يختلف عما هو موثق في فاتورة الطلب.</li>
-                        <li>في حالة وجود خطأ من طرفنا، يجب إبلاغنا خلال مدة أقصاها <strong>3 أيام</strong> من تاريخ الاستلام ليتم التعامل مع المشكلة بأسرع وقت.</li>
-                    </ul>
+                    <p>لا يمكن استرجاع أو استبدال المنتجات بعد تفصيلها، نظراً لكونها صُنعت خصيصاً للمشتري.</p>
                 </div>
             </div>
         </section>
@@ -1314,17 +1332,11 @@
                 </div>
                 <div class="legal-content">
                     <h3><i class="fas fa-user-shield"></i> حماية بياناتك</h3>
-                    <p>خصوصية معلوماتك هي أولويتنا في "المايسترو للرياضة".</p>
-                    <ul>
-                        <li>نقوم بجمع بيانات أساسية فقط (الاسم ورقم الهاتف) لغرض تنفيذ وتوصيل طلبك.</li>
-                        <li>لا نقوم بمشاركة، بيع، أو تأجير بياناتك الشخصية لأي طرف ثالث تحت أي ظرف.</li>
-                        <li>قد يتم استخدام التصاميم المنفذة للفرق والزبائن كجزء من معرض أعمالنا على حساباتنا الرسمية (مثل إنستجرام)، ما لم يطلب الزبون مسبقاً عدم نشرها.</li>
-                    </ul>
+                    <p>خصوصية معلوماتك هي أولويتنا. لا نقوم بمشاركة بياناتك لأي طرف ثالث.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Footer -->
         <footer class="premium-footer">
             <div class="container">
                 <div class="footer-grid">
@@ -1332,9 +1344,7 @@
                         <img src="~/images/logo.png" alt="المايسترو للرياضة" class="footer-logo" onerror="this.style.display='none'" style="margin: 0 auto 15px auto;">
                         <p style="color: var(--text-tertiary); font-size: 0.9rem;">الفخامة في تفصيل الملابس الرياضية</p>
                     </div>
-
                     <div style="display: flex; justify-content: space-around; text-align: right;">
-                        <!-- روابط معلومات الشركة -->
                         <div>
                             <h4 style="color: var(--gold); margin-bottom: 15px; font-size: 1.1rem;">معلومات المتجر</h4>
                             <ul class="footer-links">
@@ -1352,7 +1362,9 @@
             </div>
         </footer>
 
-        <!-- نافذة اختيار المقاس (عند الضغط على منتج) -->
+        <!-- ==============================================
+             MODAL 1: PRODUCT SIZES
+             ============================================== -->
         <div id="product-modal" class="modal-overlay">
             <div class="modal-content" style="max-height: 80vh;">
                 <div class="modal-header-sticky">
@@ -1435,6 +1447,25 @@
                             <textarea id="order-notes" class="input-modern" rows="3" placeholder="اكتب الأسماء، الأرقام المطلوبة، أو حدد ملاحظات لكل موديل..."></textarea>
                         </div>
 
+                        <!-- نظام الدفع (كامل أو عربون) -->
+                        <div class="form-section">
+                            <div class="section-label"><i class="fas fa-hand-holding-usd"></i> نظام الدفع المفضل</div>
+                            <div style="display: flex; gap: 15px;">
+                                <label class="payment-option active" id="lbl-pay-full" onclick="selectPayment('full')">
+                                    <input type="radio" name="payment_type" value="full" checked style="display:none;">
+                                    <i class="fas fa-check-circle check-icon"></i>
+                                    <span style="font-weight: 900; font-size: 1.1rem; display:block; margin-bottom:5px;">دفع كامل</span>
+                                    <span style="font-size: 0.85rem; color: var(--text-secondary);">دفع قيمة الطلب بالكامل</span>
+                                </label>
+                                <label class="payment-option" id="lbl-pay-deposit" onclick="selectPayment('deposit')">
+                                    <input type="radio" name="payment_type" value="deposit" style="display:none;">
+                                    <i class="fas fa-circle check-icon"></i>
+                                    <span style="font-weight: 900; font-size: 1.1rem; display:block; margin-bottom:5px;">دفع عربون 30%</span>
+                                    <span style="font-size: 0.85rem; color: var(--text-secondary);">الباقي عند الاستلام</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="form-section" style="display: flex; gap: 10px;">
                             <input type="text" id="coupon-input" class="input-modern" placeholder="لديك كود خصم؟">
                             <button type="button" onclick="calculateLiveTotal(true)" style="background:var(--bg-surface-elevated); border:1px solid var(--gold); color:var(--gold); border-radius:var(--border-radius-md); padding:0 25px; font-weight:900; cursor:pointer; transition: 0.3s;">تطبيق</button>
@@ -1455,8 +1486,13 @@
                                 <span id="summary-total-qty" style="font-weight:bold;">0 قطعة</span>
                             </div>
                             <div class="summary-row total">
-                                <span>الإجمالي النهائي:</span>
+                                <span>الإجمالي النهائي للطلب:</span>
                                 <span><span id="summary-total-price">0</span> ر.ع</span>
+                            </div>
+                            <!-- المطلوب دفعه الآن -->
+                            <div class="summary-row total" style="margin-top: 5px; padding-top: 5px; border: none; font-size: 1.1rem;">
+                                <span style="color: #fff;">المطلوب تحويله الآن:</span>
+                                <span><span id="summary-pay-now" style="color: #2ecc71;">0</span> ر.ع</span>
                             </div>
                         </div>
 
@@ -1470,12 +1506,12 @@
                     <div id="footer-step-1">
                         <div class="price-summary">
                             <div style="display:flex; flex-direction:column;">
-                                <span style="color:var(--text-primary); font-weight:800; font-size:1.1rem;">الإجمالي:</span>
+                                <span style="color:var(--text-primary); font-weight:800; font-size:1.1rem;">المطلوب الآن:</span>
                                 <span id="discount-display" class="hidden" style="color: #2ecc71; font-size: 0.85rem; font-weight: bold; margin-top: 3px;"></span>
                             </div>
                             <div>
-                                <span class="price-summary-value" id="total-price-display">0</span>
-                                <span style="font-size:1.2rem; font-weight:700; color:var(--gold); margin-right:5px;">ر.ع</span>
+                                <span class="price-summary-value" id="total-price-display" style="color:#2ecc71;">0</span>
+                                <span style="font-size:1.2rem; font-weight:700; color:#2ecc71; margin-right:5px;">ر.ع</span>
                             </div>
                         </div>
                         <button class="btn-wizard" onclick="goToStep2()">
@@ -1500,7 +1536,6 @@
             <span>للاستفسار</span>
         </a>
 
-        <!-- زر السلة العائم -->
         <div id="cart-float-btn" class="cart-float-btn" onclick="openCheckoutModal()">
             <i class="fas fa-shopping-cart"></i> السلة
             <span id="cart-badge-counter" class="cart-badge-counter">0</span>
@@ -1515,24 +1550,21 @@
         const promoBannerUrl = '@Html.Raw(ViewBag.PromoBannerUrl ?? "")';
 
         let allProducts = [];
-        let globalCart = []; // السلة الشاملة
+        let globalCart = [];
         let currentModalProduct = null;
         let currentSelectedSizeId = null;
 
-        // متغيرات الكوبون
         let activeCouponCode = "";
         let appliedDiscountPercent = 0;
         let appliedFreePiece = false;
 
         window.onload = () => {
             initPromoBanner();
-
             categoriesData.forEach(cat => {
                 if(cat.Products && cat.Products.length > 0) {
                     allProducts = allProducts.concat(cat.Products);
                 }
             });
-
             renderCategoriesGrid();
             renderFabrics();
             toggleView('home');
@@ -1670,10 +1702,6 @@
             toggleView('shop');
         }
 
-        // ==========================================
-        // Modal & Cart Logic
-        // ==========================================
-
         function openProductModal(productId) {
             currentModalProduct = allProducts.find(p => p.Id === productId);
             if (!currentModalProduct) return;
@@ -1763,16 +1791,34 @@
             else floatBtn.style.display = 'none';
         }
 
+        // اختيار نظام الدفع وتغيير التصميم
+        function selectPayment(type) {
+            document.getElementById('lbl-pay-full').classList.remove('active');
+            document.getElementById('lbl-pay-deposit').classList.remove('active');
+            document.querySelector('#lbl-pay-full .check-icon').className = "fas fa-circle check-icon";
+            document.querySelector('#lbl-pay-deposit .check-icon').className = "fas fa-circle check-icon";
+
+            if(type === 'full') {
+                document.getElementById('lbl-pay-full').classList.add('active');
+                document.querySelector('#lbl-pay-full .check-icon').className = "fas fa-check-circle check-icon";
+                document.querySelector('input[value="full"]').checked = true;
+            } else {
+                document.getElementById('lbl-pay-deposit').classList.add('active');
+                document.querySelector('#lbl-pay-deposit .check-icon').className = "fas fa-check-circle check-icon";
+                document.querySelector('input[value="deposit"]').checked = true;
+            }
+            calculateLiveTotal();
+        }
+
         function openCheckoutModal() {
             if(globalCart.length === 0) {
                 toast("السلة فارغة", "warning");
                 return;
             }
 
-            document.getElementById('expected-date-display').innerText = "جاري حساب التاريخ...";
+            document.getElementById('expected-date-display').innerText = "جاري الحساب...";
             renderCartItems();
 
-            // جلب التاريخ الديناميكي من الباك إند
             const totalQty = globalCart.reduce((sum, item) => sum + item.Quantity, 0);
             fetch(`/Home/GetEstimatedDeliveryDate?requestedQty=${totalQty}`)
                 .then(res => res.json())
@@ -1827,8 +1873,6 @@
                 closeCheckoutModal();
             } else {
                 renderCartItems();
-
-                // تحديث التاريخ الديناميكي
                 document.getElementById('expected-date-display').innerText = "جاري الحساب...";
                 const totalQty = globalCart.reduce((sum, item) => sum + item.Quantity, 0);
                 fetch(`/Home/GetEstimatedDeliveryDate?requestedQty=${totalQty}`)
@@ -1903,9 +1947,18 @@
                 }
 
                 let final = Math.max(0, totalPrice - discountAmount);
-                document.getElementById('total-price-display').innerText = final.toFixed(2);
                 document.getElementById('summary-total-price').innerText = final.toFixed(2);
                 document.getElementById('summary-total-qty').innerText = `${totalQty} قطعة`;
+
+                // حساب المدفوع الآن بناءً على نوع الدفع
+                const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
+                let amountToPayNow = final;
+                if (paymentType === 'deposit') {
+                    amountToPayNow = final * 0.3;
+                }
+
+                document.getElementById('summary-pay-now').innerText = amountToPayNow.toFixed(2);
+                document.getElementById('total-price-display').innerText = amountToPayNow.toFixed(2);
 
                 const discDisplay = document.getElementById('discount-display');
                 if (discountAmount > 0 && totalQty > 0) {
@@ -1949,15 +2002,17 @@
             btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> جاري إرسال الطلب...';
 
             const fabricSelect = document.getElementById('fabric-select');
+            const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
             const formData = new FormData();
+
             formData.append('CustomerName', document.getElementById('customer-name').value.trim());
             formData.append('PhoneNumber', document.getElementById('customer-phone').value.trim());
             formData.append('Notes', document.getElementById('order-notes').value || "");
             formData.append('FabricType', fabricSelect.options[fabricSelect.selectedIndex]?.getAttribute('data-name') || "قياسي");
             formData.append('FabricExtraPrice', parseFloat(fabricSelect.value) || 0);
             formData.append('CouponCode', activeCouponCode);
+            formData.append('PaymentType', paymentType); // إرسال نوع الدفع
 
-            // تجميع السلة لتتوافق مع الـ Backend
             let groupedCart = [];
             globalCart.forEach(item => {
                 let existingProduct = groupedCart.find(p => p.ProductId === item.ProductId);
@@ -1996,6 +2051,7 @@
                         `;
                     }
 
+                    // إظهار التهنئة مع المبلغ المطلوب تحويله بناءً على الاختيار
                     Swal.fire({
                         title: 'تم تأكيد طلبك بنجاح!',
                         html: `<div style="text-align:right; margin-top:20px; line-height: 1.8;">
@@ -2003,13 +2059,19 @@
                                     <p style="font-size:0.95rem; color:var(--text-secondary); margin-bottom:5px;">رقم الطلب المرجعي</p>
                                     <p style="font-size:2.8rem; font-weight:900; color:var(--gold); margin:0; letter-spacing: 2px; text-shadow: 0 0 10px rgba(212,175,55,0.3);">#${data.orderId}</p>
                                 </div>
+
+                                <div style="background:rgba(46, 204, 113, 0.1); border:1px dashed #2ecc71; border-radius:12px; padding:15px; text-align:center;">
+                                    <p style="margin:0; font-size:1.1rem;">المطلوب تحويله الآن:</p>
+                                    <p style="margin:0; font-size:1.8rem; font-weight:bold; color:#2ecc71;">${data.paidAmount} ر.ع</p>
+                                </div>
+
                                 ${giftHtml}
                                 <div style="padding: 0 10px; font-size: 1.1rem; margin-top: 20px;">
                                     <p>الاسم: <strong style="color:#fff;">${document.getElementById('customer-name').value.trim()}</strong></p>
-                                    <p>موعد التسليم المتوقع: <strong style="color:#2ecc71;">${data.deliveryDate}</strong></p>
+                                    <p>موعد التسليم المتوقع: <strong style="color:#3498db;">${data.deliveryDate}</strong></p>
                                 </div>
                                 <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:20px; text-align:center; padding-top: 15px; border-top: 1px solid var(--border-subtle);">
-                                    سيتواصل معك فريق المايسترو قريباً لتأكيد الدفع والبدء بالتنفيذ.
+                                    يرجى تحويل المبلغ الموضح وتزويدنا بالإيصال عبر الواتساب لبدء التفصيل.
                                 </p>
                                </div>`,
                         icon: 'success', confirmButtonText: 'حسناً، شكراً لكم',

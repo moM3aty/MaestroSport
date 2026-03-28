@@ -9,125 +9,125 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = MaestroSport
 build_property.RootNamespace = MaestroSport
-build_property.ProjectDir = D:\Dev\MaestroSport\MaestroSport\
+build_property.ProjectDir = C:\Users\MOHAMED ABO-ELM3ATY\Downloads\Projects\MaestroSport\MaestroSport\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = D:\Dev\MaestroSport\MaestroSport
+build_property.MSBuildProjectDirectory = C:\Users\MOHAMED ABO-ELM3ATY\Downloads\Projects\MaestroSport\MaestroSport
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Account/Login.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Admin/Index.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Admin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Categories/Create.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Categories/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2F0ZWdvcmllc1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Categories/Edit.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Categories/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2F0ZWdvcmllc1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Categories/Index.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Categories/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2F0ZWdvcmllc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Coupons/Create.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Coupons/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ291cG9uc1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Coupons/Edit.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Coupons/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ291cG9uc1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Coupons/Index.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Coupons/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ291cG9uc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Fabrics/Create.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Fabrics/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmFicmljc1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Fabrics/Edit.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Fabrics/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmFicmljc1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Fabrics/Index.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Fabrics/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRmFicmljc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Home/Index.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Orders/Details.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Orders/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Orders/Index.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Orders/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Products/Create.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Products/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdHNcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Products/Edit.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Products/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdHNcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Products/Index.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Products/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdHNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Settings/ChangePassword.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Settings/ChangePassword.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2V0dGluZ3NcQ2hhbmdlUGFzc3dvcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Settings/Index.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Settings/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2V0dGluZ3NcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Shared/Error.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Shared/_AdminLayout.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Shared/_AdminLayout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9BZG1pbkxheW91dC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Shared/_ValidationScriptsPartial.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Sizes/Create.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Sizes/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2l6ZXNcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Sizes/Edit.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Sizes/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2l6ZXNcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Sizes/Index.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Sizes/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2l6ZXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/_ViewImports.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/_ViewStart.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Dev/MaestroSport/MaestroSport/Views/Shared/_Layout.cshtml]
+[C:/Users/MOHAMED ABO-ELM3ATY/Downloads/Projects/MaestroSport/MaestroSport/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-7wis621s3m

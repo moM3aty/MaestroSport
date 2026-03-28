@@ -23,6 +23,7 @@ namespace MaestroSport.Controllers
         public decimal FabricExtraPrice { get; set; }
         public string CouponCode { get; set; }
         public string CartJson { get; set; }
+        public string PaymentType { get; set; } // "full" or "deposit"
         public IFormFile CustomImage { get; set; }
     }
 
@@ -70,9 +71,6 @@ namespace MaestroSport.Controllers
             return View();
         }
 
-        // ==========================================
-        // دالة جديدة لحساب تاريخ التسليم الديناميكي للواجهة
-        // ==========================================
         [HttpGet]
         public async Task<IActionResult> GetEstimatedDeliveryDate(int requestedQty)
         {
@@ -89,8 +87,7 @@ namespace MaestroSport.Controllers
             int totalItems = todayItemsCount + requestedQty;
             int extraDays = 0;
 
-            // معادلة حساب الأيام الإضافية (يضيف يومين لكل سعة ممتلئة)
-            if (totalItems > 0 && dailyCapacity > 0)
+            if (dailyCapacity > 0 && totalItems > dailyCapacity)
             {
                 extraDays = ((totalItems - 1) / dailyCapacity) * 2;
             }
@@ -134,21 +131,14 @@ namespace MaestroSport.Controllers
             try
             {
                 if (string.IsNullOrWhiteSpace(request.CartJson))
-                {
-                    return Json(new { success = false, message = "بيانات السلة مفقودة. يرجى تحديث الصفحة والمحاولة مجدداً." });
-                }
+                    return Json(new { success = false, message = "بيانات السلة مفقودة. يرجى تحديث الصفحة." });
 
                 var cartItems = JsonSerializer.Deserialize<List<CartProductDto>>(request.CartJson);
                 if (cartItems == null || !cartItems.Any())
-                {
                     return Json(new { success = false, message = "السلة فارغة" });
-                }
 
                 int requestedQty = cartItems.SelectMany(c => c.Sizes).Sum(s => s.Quantity);
 
-                // ==========================================
-                // حساب تاريخ التسليم الديناميكي بدلاً من رفض الطلب
-                // ==========================================
                 int dailyCapacity = 15;
                 var capacitySetting = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "DailyCapacity");
                 if (capacitySetting != null && int.TryParse(capacitySetting.Value, out int cap)) dailyCapacity = cap;
@@ -162,13 +152,12 @@ namespace MaestroSport.Controllers
                 int totalItems = todayItemsCount + requestedQty;
                 int extraDays = 0;
 
-                if (totalItems > 0 && dailyCapacity > 0)
+                if (dailyCapacity > 0 && totalItems > dailyCapacity)
                 {
                     extraDays = ((totalItems - 1) / dailyCapacity) * 2;
                 }
 
                 DateTime finalDeliveryDate = DateTime.Now.AddDays(2 + extraDays);
-                // ==========================================
 
                 string generatedGiftCode = null;
                 if (requestedQty >= 10)
@@ -185,7 +174,8 @@ namespace MaestroSport.Controllers
                     FabricType = request.FabricType,
                     FabricExtraPrice = request.FabricExtraPrice,
                     CouponCode = request.CouponCode,
-                    ExpectedDeliveryDate = finalDeliveryDate // تم وضع التاريخ المحسوب هنا
+                    ExpectedDeliveryDate = finalDeliveryDate,
+                    PaymentType = request.PaymentType == "deposit" ? "عربون 30%" : "كامل"
                 };
 
                 if (request.CustomImage != null && request.CustomImage.Length > 0)
@@ -264,6 +254,18 @@ namespace MaestroSport.Controllers
                 }
 
                 order.TotalAmount = Math.Max(0, totalAmount);
+
+                // حساب المدفوع والمتبقي بناءً على اختيار العميل
+                if (request.PaymentType == "deposit")
+                {
+                    order.PaidAmount = Math.Round(order.TotalAmount * 0.3m, 2);
+                }
+                else
+                {
+                    order.PaidAmount = order.TotalAmount;
+                }
+                order.RemainingAmount = order.TotalAmount - order.PaidAmount;
+
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
@@ -272,6 +274,7 @@ namespace MaestroSport.Controllers
                     success = true,
                     orderId = order.Id,
                     totalPrice = order.TotalAmount,
+                    paidAmount = order.PaidAmount, // إرسال المطلوب دفعه للواجهة ليعرض في التهنئة
                     deliveryDate = order.ExpectedDeliveryDate.ToString("yyyy/MM/dd"),
                     giftCode = generatedGiftCode
                 });
