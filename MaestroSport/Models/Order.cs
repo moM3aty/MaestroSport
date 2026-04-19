@@ -34,11 +34,10 @@ namespace MaestroSport.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; }
 
-        // --- حقول نظام الدفع الجديدة ---
         [Display(Name = "نظام الدفع")]
-        public string PaymentType { get; set; } = "كامل"; // "كامل" أو "عربون"
+        public string PaymentType { get; set; } = "كامل";
 
-        [Display(Name = "المدفوع الآن")]
+        [Display(Name = "المدفوع عبر Paymob")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal PaidAmount { get; set; }
 
@@ -46,13 +45,16 @@ namespace MaestroSport.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal RemainingAmount { get; set; }
 
+        // --- حقول Paymob الجديدة ---
+        public string? PaymobOrderId { get; set; } // لحفظ رقم طلب بي موب
+        public bool IsPaid { get; set; } = false; // هل تمت عملية الدفع بنجاح؟
+
         public DateTime ExpectedDeliveryDate { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public string Status { get; set; } = "قيد المراجعة";
+        public string Status { get; set; } = "بانتظار الدفع"; // الحالة الافتراضية
 
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
-
 
 public class OrderItem
     {
