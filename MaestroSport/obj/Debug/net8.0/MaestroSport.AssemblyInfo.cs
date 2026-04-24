@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MaestroSport")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd3ba6bfbc667c42d90f57dc9d2a67b3c5f63aeb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2889be01113aa31d1ce147ded9d80e6961b6dd15")]
 [assembly: System.Reflection.AssemblyProductAttribute("MaestroSport")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MaestroSport")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

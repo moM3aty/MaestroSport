@@ -6,6 +6,7 @@ wwwroot\images\custom_designs\27223bb6-8eec-41d5-b5c5-4af6db8284fb_BANNER.png
 wwwroot\images\custom_designs\3d430613-d9a8-4683-9c90-5d0092767463_BANNER.png
 wwwroot\images\custom_designs\6e59d34c-2d7c-471b-b627-2c404bb4fdb1_2.jpeg
 wwwroot\images\custom_designs\7b2b42f6-9a0d-4c5b-88b6-9540dae64d1a_2.jpeg
+wwwroot\images\custom_designs\84b3e7f1-4958-491b-b339-f70a05b0b5fb_cOd3EfWfrDP0n64aE7wrEEXzWprxjvx6kvvsO0aR.png
 wwwroot\images\custom_designs\8be07137-5a77-47fa-baad-f5293146647d_logo-mini.jpg
 wwwroot\images\custom_designs\9353855e-5272-459e-ba53-90689e6466dc_2.jpg
 wwwroot\images\custom_designs\a7515054-d2e5-4309-ab2a-43644e5d7d42_2.jpeg

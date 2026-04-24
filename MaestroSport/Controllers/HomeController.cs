@@ -39,7 +39,7 @@ namespace MaestroSport.Controllers
         // --- بيانات Paymob ---
         private const string PaymobApiKey = "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TkRNMk56VXNJbTVoYldVaU9pSnBibWwwYVdGc0luMC5WbkgzYXE5SnZBSjltQUMwc2pvNjJ3eVRWWDBIaFNEa1g0UllOMmppQklablRnRmI1aHNWOFpaUUVxRmU3UFlyY0FiMm11NXpuYzZqM2RsX25ORGtBQQ==";
         private const string PaymobHmacKey = "91ECCACD2AFB70ACF6ABCC1993EDCDEA";
-        private const string PaymobIframeId = "43077";
+        // لم نعد بحاجة لرقم الايفريم لأننا سنستخدم الـ Unified Checkout
         private const int PaymobIntegrationId = 63327;
 
         public HomeController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
@@ -129,7 +129,6 @@ namespace MaestroSport.Controllers
 
                 int requestedQty = cartItems.SelectMany(c => c.Sizes).Sum(s => s.Quantity);
 
-                // حساب السعة الإنتاجية
                 int dailyCapacity = 15;
                 var capacitySetting = await _context.SiteSettings.FirstOrDefaultAsync(s => s.Key == "DailyCapacity");
                 if (capacitySetting != null && int.TryParse(capacitySetting.Value, out int cap)) dailyCapacity = cap;
@@ -146,16 +145,10 @@ namespace MaestroSport.Controllers
                     _context.Coupons.Add(new Coupon { Code = generatedGiftCode, IsFreePiece = true, IsActive = true });
                 }
 
-                // ===============================================
-                // الحساب الدقيق للإجمالي من قاعدة البيانات مباشرة
-                // لضمان تطابق مبلغ Paymob مع الظاهر للعميل
-                // ===============================================
-
                 decimal totalAmount = 0;
                 decimal firstProductBasePrice = 0;
                 bool hasCustomDesign = false;
 
-                // جلب سعر القماش من قاعدة البيانات لتجنب مشاكل قراءة الكسور العشرية
                 decimal safeFabricExtraPrice = 0;
                 var dbFabric = await _context.Fabrics.FirstOrDefaultAsync(f => f.Name == request.FabricType);
                 if (dbFabric != null)
@@ -169,7 +162,7 @@ namespace MaestroSport.Controllers
                     PhoneNumber = request.PhoneNumber,
                     Notes = request.Notes,
                     FabricType = request.FabricType,
-                    FabricExtraPrice = safeFabricExtraPrice, // استخدام السعر الآمن من الداتابيز
+                    FabricExtraPrice = safeFabricExtraPrice,
                     CouponCode = request.CouponCode,
                     ExpectedDeliveryDate = finalDeliveryDate,
                     PaymentType = request.PaymentType == "deposit" ? "عربون 30%" : "كامل",
@@ -192,7 +185,7 @@ namespace MaestroSport.Controllers
                     if (product == null) continue;
 
                     if (firstProductBasePrice == 0) firstProductBasePrice = product.BasePrice;
-                    if (product.IsCustomDesign) hasCustomDesign = true; // التأكد مما إذا كان أي منتج يتطلب تصميم خاص
+                    if (product.IsCustomDesign) hasCustomDesign = true;
 
                     var groupedSizes = cartItem.Sizes.GroupBy(i => i.SizeId).Select(g => new OrderItemDto { SizeId = g.Key, Quantity = g.Sum(i => i.Quantity) }).ToList();
 
@@ -215,16 +208,13 @@ namespace MaestroSport.Controllers
                     }
                 }
 
-                // 1. إضافة سعر القماش الكلي
                 totalAmount += (safeFabricExtraPrice * requestedQty);
 
-                // 2. إضافة رسوم التصميم الخاص (مطابق للفرونت إند تماماً)
                 if (hasCustomDesign && requestedQty > 0 && requestedQty <= 10)
                 {
                     totalAmount += (2 * requestedQty);
                 }
 
-                // 3. تطبيق الخصومات بشكل دقيق
                 if (!string.IsNullOrEmpty(request.CouponCode))
                 {
                     var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == request.CouponCode && c.IsActive);
@@ -248,10 +238,8 @@ namespace MaestroSport.Controllers
                     }
                 }
 
-                // تأكيد تقريب الإجمالي لعلامتين عشريتين لتجنب أي كسور طويلة
                 order.TotalAmount = Math.Round(Math.Max(0, totalAmount), 2);
 
-                // حساب المدفوع الآن بناءً على الإجمالي الحقيقي الدقيق
                 if (request.PaymentType == "deposit")
                     order.PaidAmount = Math.Round(order.TotalAmount * 0.3m, 2);
                 else
@@ -263,7 +251,7 @@ namespace MaestroSport.Controllers
                 await _context.SaveChangesAsync();
 
                 // ===============================================
-                // إرسال المبلغ الحقيقي الدقيق (النهائي) إلى Paymob 
+                // إرسال البيانات وتوليد رابط الدفع الموحد (Unified Checkout)
                 // ===============================================
                 using (var httpClient = new HttpClient())
                 {
@@ -278,7 +266,6 @@ namespace MaestroSport.Controllers
                     var authResult = JsonSerializer.Deserialize<JsonElement>(authResponseString);
                     string authToken = authResult.GetProperty("token").GetString();
 
-                    // تحويل المبلغ لبيسة / Cents (نضرب الإجمالي النهائي في 100)
                     int amountInCents = (int)Math.Round(order.PaidAmount * 100m);
 
                     var orderPayload = new
@@ -337,9 +324,11 @@ namespace MaestroSport.Controllers
                     var keyResult = JsonSerializer.Deserialize<JsonElement>(keyResponseString);
                     string paymentToken = keyResult.GetProperty("token").GetString();
 
-                    string iframeUrl = $"https://oman.paymob.com/api/acceptance/iframes/{PaymobIframeId}?payment_token={paymentToken}";
+                    // التوجيه إلى صفحة الدفع الموحدة بدلاً من Iframe
+                    string checkoutUrl = $"https://oman.paymob.com/unifiedcheckout/?payment_token={paymentToken}";
 
-                    return Json(new { success = true, iframeUrl = iframeUrl });
+                    // إرجاع المتغير الجديد للواجهة
+                    return Json(new { success = true, checkoutUrl = checkoutUrl });
                 }
             }
             catch (Exception ex)
@@ -375,7 +364,7 @@ namespace MaestroSport.Controllers
                         }
                     }
                 }
-                catch (Exception) { /* تجاهل أخطاء المعالجة هنا لكي لا يعود خطأ لـ Paymob */ }
+                catch (Exception) { /* تجاهل الأخطاء لكي لا يعود خطأ 500 لـ Paymob */ }
             }
             return Ok();
         }
